@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Suspense } from "react";
 
 import { contacts } from "@/content/contacts";
 import { CalculatorModalHost } from "@/components/forms/CalculatorModalHost";
@@ -35,7 +36,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru">
       <body>
         {children}
-        <CalculatorModalHost />
+        <Suspense fallback={null}>
+          <CalculatorModalHost />
+        </Suspense>
         <MobileBottomBar />
         {gaId ? (
           <>

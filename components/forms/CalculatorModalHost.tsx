@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { trackEvent } from "@/lib/analytics/events";
 import { formatPhoneRu, isValidRuPhone } from "@/lib/phone";
@@ -9,8 +8,6 @@ import { formatPhoneRu, isValidRuPhone } from "@/lib/phone";
 const steps = ["Тип изделия", "Размеры", "Фото", "Монтаж", "Сроки", "Контакт"];
 
 export const CalculatorModalHost = () => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -25,16 +22,6 @@ export const CalculatorModalHost = () => {
     phone: "+7",
     context: ""
   });
-
-  const utm = useMemo(
-    () => ({
-      utm_source: searchParams.get("utm_source") || "",
-      utm_campaign: searchParams.get("utm_campaign") || "",
-      utm_term: searchParams.get("utm_term") || "",
-      utm_content: searchParams.get("utm_content") || ""
-    }),
-    [searchParams]
-  );
 
   useEffect(() => {
     const openHandler = () => {
@@ -55,6 +42,15 @@ export const CalculatorModalHost = () => {
       setError("Введите корректный телефон +7.");
       return;
     }
+
+    const url = new URL(window.location.href);
+    const pathname = url.pathname;
+    const utm = {
+      utm_source: url.searchParams.get("utm_source") || "",
+      utm_campaign: url.searchParams.get("utm_campaign") || "",
+      utm_term: url.searchParams.get("utm_term") || "",
+      utm_content: url.searchParams.get("utm_content") || ""
+    };
 
     const context = [data.context, `Тип: ${data.service}`, `Размеры: ${data.size}`, `Монтаж/высота: ${data.mount}`, `Срок: ${data.deadline}`]
       .filter(Boolean)

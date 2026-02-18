@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 import { contacts } from "@/content/contacts";
 import { trackEvent } from "@/lib/analytics/events";
@@ -17,8 +16,6 @@ type Props = {
 const RATE_LIMIT_MS = 45_000;
 
 export const LeadForm = ({ title = "Рассчитать стоимость", buttonText = "Отправить заявку", service, compact }: Props) => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+7");
   const [context, setContext] = useState("");
@@ -26,16 +23,6 @@ export const LeadForm = ({ title = "Рассчитать стоимость", bu
   const [file, setFile] = useState<File | null>(null);
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState("");
-
-  const utm = useMemo(
-    () => ({
-      utm_source: searchParams.get("utm_source") || "",
-      utm_campaign: searchParams.get("utm_campaign") || "",
-      utm_term: searchParams.get("utm_term") || "",
-      utm_content: searchParams.get("utm_content") || ""
-    }),
-    [searchParams]
-  );
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -56,6 +43,15 @@ export const LeadForm = ({ title = "Рассчитать стоимость", bu
       setError("Повторная отправка доступна через 45 секунд.");
       return;
     }
+
+    const url = new URL(window.location.href);
+    const pathname = url.pathname;
+    const utm = {
+      utm_source: url.searchParams.get("utm_source") || "",
+      utm_campaign: url.searchParams.get("utm_campaign") || "",
+      utm_term: url.searchParams.get("utm_term") || "",
+      utm_content: url.searchParams.get("utm_content") || ""
+    };
 
     const formData = new FormData();
     formData.append("name", name);
@@ -154,3 +150,4 @@ export const LeadForm = ({ title = "Рассчитать стоимость", bu
     </form>
   );
 };
+
