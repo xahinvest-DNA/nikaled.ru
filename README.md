@@ -29,3 +29,9 @@ chmod +x deploy.sh
 ```bash
 APP_DIR=/var/www/nikaled BRANCH=main PM2_APP=nikaled ./deploy.sh
 ```
+
+Если нужно принудительно переустановить зависимости:
+
+```bash
+FORCE_INSTALL=1 ./deploy.sh
+```
