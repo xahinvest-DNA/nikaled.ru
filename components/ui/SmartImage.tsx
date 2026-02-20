@@ -10,6 +10,5 @@ type Props = ImageProps & {
 export const SmartImage = ({ src, fallbackSrc, alt, ...props }: Props) => {
   const [currentSrc, setCurrentSrc] = useState(src);
 
-  return <Image {...props} src={currentSrc} alt={alt} onError={() => setCurrentSrc(fallbackSrc)} />;
+  return <Image {...props} src={currentSrc} alt={alt} quality={95} onError={() => setCurrentSrc(fallbackSrc)} />;
 };
-

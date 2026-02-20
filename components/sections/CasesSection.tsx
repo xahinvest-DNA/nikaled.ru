@@ -16,8 +16,15 @@ export const CasesSection = ({ title = "Наши работы", items }: Props) 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {items.map((item) => (
             <article key={item.id} className="card">
-              <div className="relative h-52 overflow-hidden rounded-xl border border-steel/10">
-                <SmartImage src={item.image} fallbackSrc={media.caseFallback} alt={item.title} fill className="object-cover" />
+              <div className="relative h-56 overflow-hidden rounded-xl border border-steel/10 bg-slate-100 p-2">
+                <SmartImage
+                  src={item.image}
+                  fallbackSrc={media.caseFallback}
+                  alt={item.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-contain"
+                />
               </div>
               <h3 className="mt-4 text-lg font-bold text-steel">{item.title}</h3>
               <p className="mt-1 text-sm text-steel/80">
