@@ -27,15 +27,18 @@ export const Hero = () => {
           </div>
           <p className="text-sm text-steel/70">Ответим в течение 10 минут</p>
         </div>
-        <div className="relative min-h-64 overflow-hidden rounded-2xl border border-steel/10 bg-white shadow-card">
-          <SmartImage
-            src={media.hero}
-            fallbackSrc={media.caseFallback}
-            alt="Подсвеченная вывеска на реальном объекте"
-            fill
-            className="object-cover"
-            priority
-          />
+        <div className="overflow-hidden rounded-2xl border border-steel/10 bg-[#020b1a] shadow-card">
+          <div className="relative aspect-[16/10] w-full">
+            <SmartImage
+              src={media.hero}
+              fallbackSrc={media.caseFallback}
+              alt="Изображение Nikaled"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-contain p-2 md:p-3"
+              priority
+            />
+          </div>
         </div>
       </div>
     </section>
