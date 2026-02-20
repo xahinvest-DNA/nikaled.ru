@@ -20,8 +20,16 @@ export default function PortfolioPage() {
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {cases.map((item) => (
             <article key={item.id} className="card">
-              <div className="relative h-56 overflow-hidden rounded-xl border border-steel/10">
-                <SmartImage src={item.image} fallbackSrc={media.caseFallback} alt={item.title} fill className="object-cover" />
+              <div className="overflow-hidden rounded-xl border border-steel/10 bg-slate-100 p-2">
+                <SmartImage
+                  src={item.image}
+                  fallbackSrc={media.caseFallback}
+                  alt={item.title}
+                  width={1280}
+                  height={720}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="mx-auto h-56 w-full object-contain"
+                />
               </div>
               <h2 className="mt-4 text-xl font-bold text-steel">{item.title}</h2>
               <p className="mt-1 text-sm text-steel/80">{item.task}</p>
