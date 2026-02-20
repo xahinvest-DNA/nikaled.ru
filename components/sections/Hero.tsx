@@ -35,7 +35,7 @@ export const Hero = () => {
               alt="Изображение Nikaled"
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-contain object-center"
+              className="object-cover object-center"
               priority
             />
           </div>
