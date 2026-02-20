@@ -28,14 +28,14 @@ export const Hero = () => {
           <p className="text-sm text-steel/70">Ответим в течение 10 минут</p>
         </div>
         <div className="overflow-hidden rounded-2xl border border-steel/10 bg-[#020b1a] shadow-card">
-          <div className="relative aspect-[16/10] w-full">
+          <div className="relative aspect-[3/2] w-full">
             <SmartImage
               src={media.hero}
               fallbackSrc={media.caseFallback}
               alt="Изображение Nikaled"
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-contain p-2 md:p-3"
+              className="object-contain object-center"
               priority
             />
           </div>
@@ -44,4 +44,3 @@ export const Hero = () => {
     </section>
   );
 };
-
