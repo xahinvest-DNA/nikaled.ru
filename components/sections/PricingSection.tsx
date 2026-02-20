@@ -28,9 +28,8 @@ export const PricingSection = ({ service }: Props) => {
             ))}
           </div>
         </div>
-        <LeadForm title="После цены чаще всего оставляют заявку" buttonText="Рассчитать стоимость" service={service} compact />
+        <LeadForm title="Оставить заявку" buttonText="Рассчитать стоимость" service={service} compact />
       </div>
     </section>
   );
 };
-
