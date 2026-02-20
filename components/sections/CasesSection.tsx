@@ -8,7 +8,7 @@ type Props = {
   items: CaseItem[];
 };
 
-export const CasesSection = ({ title = "Кейсы с цифрами", items }: Props) => {
+export const CasesSection = ({ title = "Наши работы", items }: Props) => {
   return (
     <section className="section-space">
       <div className="container-narrow">
@@ -40,4 +40,3 @@ export const CasesSection = ({ title = "Кейсы с цифрами", items }: 
     </section>
   );
 };
-
