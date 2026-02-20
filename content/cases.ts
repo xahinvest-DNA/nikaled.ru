@@ -19,7 +19,7 @@ export const cases: CaseItem[] = [
     result: "Объёмные буквы с контражурной подсветкой.",
     term: "10 дней",
     budget: "185 000 ₽",
-    image: "/images/case-1.svg",
+    image: "/images/real/case-1.jpg",
     services: ["obemnye-bukvy", "vyveski-voronezh"]
   },
   {
@@ -29,7 +29,7 @@ export const cases: CaseItem[] = [
     result: "Световая вывеска + оформление входной группы.",
     term: "8 дней",
     budget: "120 000 ₽",
-    image: "/images/case-2.svg",
+    image: "/images/real/case-2.jpg",
     services: ["vyveski-voronezh"]
   },
   {
@@ -39,7 +39,7 @@ export const cases: CaseItem[] = [
     result: "Лайтбокс + световой кронштейн.",
     term: "7 дней",
     budget: "74 000 ₽",
-    image: "/images/case-3.svg",
+    image: "/images/real/case-3.jpg",
     services: ["laitboksy", "vyveski-voronezh"]
   },
   {
@@ -49,7 +49,7 @@ export const cases: CaseItem[] = [
     result: "Согласование + световая вывеска под требования администрации.",
     term: "14 дней",
     budget: "162 000 ₽",
-    image: "/images/case-4.svg",
+    image: "/images/real/case-4.jpg",
     services: ["soglasovanie-vyvesok", "vyveski-voronezh"]
   },
   {
@@ -59,7 +59,7 @@ export const cases: CaseItem[] = [
     result: "Комплект лайтбоксов и навигации.",
     term: "11 дней",
     budget: "210 000 ₽",
-    image: "/images/case-5.svg",
+    image: "/images/real/case-5.jpg",
     services: ["laitboksy"]
   },
   {
@@ -69,7 +69,7 @@ export const cases: CaseItem[] = [
     result: "Объёмные буквы на композитной подложке.",
     term: "9 дней",
     budget: "138 000 ₽",
-    image: "/images/case-6.svg",
+    image: "/images/real/case-6.jpg",
     services: ["obemnye-bukvy"]
   }
 ];

@@ -1,7 +1,7 @@
-import Image from "next/image";
-
 import { Header } from "@/components/layout/Header";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { cases } from "@/content/cases";
+import { media } from "@/content/media";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata = buildPageMetadata(
@@ -21,7 +21,7 @@ export default function PortfolioPage() {
           {cases.map((item) => (
             <article key={item.id} className="card">
               <div className="relative h-56 overflow-hidden rounded-xl border border-steel/10">
-                <Image src={item.image} alt={item.title} fill className="object-cover" />
+                <SmartImage src={item.image} fallbackSrc={media.caseFallback} alt={item.title} fill className="object-cover" />
               </div>
               <h2 className="mt-4 text-xl font-bold text-steel">{item.title}</h2>
               <p className="mt-1 text-sm text-steel/80">{item.task}</p>
@@ -35,4 +35,3 @@ export default function PortfolioPage() {
     </>
   );
 }
-

@@ -1,6 +1,6 @@
-import Image from "next/image";
-
 import { Header } from "@/components/layout/Header";
+import { SmartImage } from "@/components/ui/SmartImage";
+import { media } from "@/content/media";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata = buildPageMetadata(
@@ -16,7 +16,8 @@ export default function AboutPage() {
       <main className="container-narrow section-space pb-24 md:pb-16">
         <h1 className="text-3xl font-black text-ink md:text-5xl">О компании</h1>
         <p className="mt-4 max-w-3xl text-sm text-steel/80">
-          Мы производим и монтируем наружную рекламу в Воронеже более 8 лет. Берем проект под ключ: от замера и дизайна до монтажа и гарантии.
+          Мы производим и монтируем наружную рекламу в Воронеже более 8 лет. Берем проект под ключ: от замера и дизайна до монтажа и
+          гарантии.
         </p>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           <article className="card">
@@ -29,7 +30,7 @@ export default function AboutPage() {
             </ul>
           </article>
           <div className="relative min-h-72 overflow-hidden rounded-2xl border border-steel/10 bg-white shadow-card">
-            <Image src="/images/workshop.svg" alt="Производство наружной рекламы" fill className="object-cover" />
+            <SmartImage src={media.workshop} fallbackSrc={media.caseFallback} alt="Производство наружной рекламы" fill className="object-cover" />
           </div>
         </div>
       </main>

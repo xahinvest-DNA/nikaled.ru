@@ -1,7 +1,7 @@
-import Image from "next/image";
-
 import { OpenCalcButton } from "@/components/ui/OpenCalcButton";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { contacts } from "@/content/contacts";
+import { media } from "@/content/media";
 
 export const Hero = () => {
   return (
@@ -28,9 +28,17 @@ export const Hero = () => {
           <p className="text-sm text-steel/70">Ответим в течение 10 минут</p>
         </div>
         <div className="relative min-h-64 overflow-hidden rounded-2xl border border-steel/10 bg-white shadow-card">
-          <Image src="/images/hero-object.svg" alt="Подсвеченная вывеска на реальном объекте" fill className="object-cover" priority />
+          <SmartImage
+            src={media.hero}
+            fallbackSrc={media.caseFallback}
+            alt="Подсвеченная вывеска на реальном объекте"
+            fill
+            className="object-cover"
+            priority
+          />
         </div>
       </div>
     </section>
   );
 };
+

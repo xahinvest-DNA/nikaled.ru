@@ -1,5 +1,5 @@
-import Image from "next/image";
-
+import { SmartImage } from "@/components/ui/SmartImage";
+import { media } from "@/content/media";
 import { trustStats } from "@/content/stats";
 
 export const TrustSection = () => {
@@ -18,7 +18,7 @@ export const TrustSection = () => {
           </div>
         </div>
         <div className="relative min-h-72 overflow-hidden rounded-2xl border border-steel/10 bg-white shadow-card">
-          <Image src="/images/workshop.svg" alt="Фото цеха и процесса монтажа" fill className="object-cover" />
+          <SmartImage src={media.workshop} fallbackSrc={media.caseFallback} alt="Фото цеха и процесса монтажа" fill className="object-cover" />
         </div>
       </div>
     </section>

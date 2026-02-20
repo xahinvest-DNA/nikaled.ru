@@ -1,7 +1,7 @@
-import Image from "next/image";
-
 import { type CaseItem } from "@/content/cases";
+import { media } from "@/content/media";
 import { OpenCalcButton } from "@/components/ui/OpenCalcButton";
+import { SmartImage } from "@/components/ui/SmartImage";
 
 type Props = {
   title?: string;
@@ -17,7 +17,7 @@ export const CasesSection = ({ title = "Кейсы с цифрами", items }: 
           {items.map((item) => (
             <article key={item.id} className="card">
               <div className="relative h-52 overflow-hidden rounded-xl border border-steel/10">
-                <Image src={item.image} alt={item.title} fill className="object-cover" />
+                <SmartImage src={item.image} fallbackSrc={media.caseFallback} alt={item.title} fill className="object-cover" />
               </div>
               <h3 className="mt-4 text-lg font-bold text-steel">{item.title}</h3>
               <p className="mt-1 text-sm text-steel/80">
