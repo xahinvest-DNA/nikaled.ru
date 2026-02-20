@@ -54,11 +54,11 @@ export const cases: CaseItem[] = [
   },
   {
     id: "market",
-    title: "Сетевой минимаркет",
-    task: "Быстрый ребрендинг фасада на 2 входные группы.",
-    result: "Комплект лайтбоксов и навигации.",
+    title: "Магазин цветов",
+    task: "Быстрый ребрендинг фасада",
+    result: "Лайтбокс и объемные буквы на каркасе.",
     term: "11 дней",
-    budget: "210 000 ₽",
+    budget: "95 000 ₽",
     image: "/images/real/case-5-v2.webp",
     services: ["laitboksy"]
   },
