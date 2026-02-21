@@ -38,8 +38,8 @@ export async function POST(request: Request) {
 
     await sendLead(payload, file);
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    console.error("Lead API error:", error);
     return bad("Internal error", 500);
   }
 }
-

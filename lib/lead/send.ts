@@ -37,10 +37,14 @@ export const sendLeadToTelegram = async (lead: LeadPayload, file?: File) => {
       form.append("chat_id", chatId);
       form.append("document", file, file.name);
       form.append("caption", "Файл к заявке");
-      await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: "POST", body: form });
+      const fileRes = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: "POST", body: form });
+      if (!fileRes.ok) {
+        const details = await fileRes.text();
+        throw new Error(`Telegram sendDocument failed for chat_id=${chatId}: ${details}`);
+      }
     }
 
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const msgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -48,6 +52,10 @@ export const sendLeadToTelegram = async (lead: LeadPayload, file?: File) => {
         text: leadText
       })
     });
+    if (!msgRes.ok) {
+      const details = await msgRes.text();
+      throw new Error(`Telegram sendMessage failed for chat_id=${chatId}: ${details}`);
+    }
   }
 };
 
