@@ -13,6 +13,16 @@ export type CaseItem = {
 
 export const cases: CaseItem[] = [
   {
+    id: "genetics-center",
+    title: "Селекционно-генетический центр",
+    task: "Реализовать утвержденный проект по отделке входной группы",
+    result: "Обшивка колонн и фриза алюминиевыми композитными панелями. Объёмные световые буквы на фризе.",
+    term: "14 дней",
+    budget: "450 000 ₽",
+    image: "/images/real/case-7-v1.jpg",
+    services: ["vyveski-voronezh", "obemnye-bukvy"]
+  },
+  {
     id: "shop-fashion",
     title: "Магазин одежды",
     task: "Сделать заметную вывеску с высокой читаемостью вечером.",
