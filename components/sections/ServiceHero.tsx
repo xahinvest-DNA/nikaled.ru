@@ -19,10 +19,9 @@ export const ServiceHero = ({ service }: Props) => {
         </div>
         <p className="mt-5 text-sm text-steel/85">Пришлите размеры/фото - посчитаем точнее.</p>
         <div className="mt-4">
-          <OpenCalcButton text="Рассчитать стоимость" />
+          <OpenCalcButton text="Получить расчёт и понять бюджет" />
         </div>
       </div>
     </section>
   );
 };
-

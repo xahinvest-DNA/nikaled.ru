@@ -11,16 +11,14 @@ export const Hero = () => {
           <p className="inline-flex rounded-full border border-steel/15 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-steel/75">
             Производство в Воронеже
           </p>
-          <h1 className="text-3xl font-black leading-tight text-ink md:text-5xl">Изготовление наружной рекламы в Воронеже под ключ</h1>
+          <h1 className="text-3xl font-black leading-tight text-ink md:text-5xl">
+            Вывеска, которая пройдёт согласование и начнёт приводить клиентов с первого дня открытия.
+          </h1>
           <p className="text-base text-steel/85 md:text-lg">
-            Вывески • Объёмные буквы • Лайтбоксы
-            <br />
-            От проекта до монтажа за 7-14 дней
-            <br />
-            Гарантия 24 месяца
+            Берём на себя замер, дизайн, производство, монтаж и документы. Без срывов сроков и переделок.
           </p>
           <div className="flex flex-wrap gap-3">
-            <OpenCalcButton text="Рассчитать стоимость" />
+            <OpenCalcButton text="Получить расчёт и понять бюджет" />
             <a href={`tel:${contacts.phoneRaw}`} className="btn-secondary">
               Получить консультацию
             </a>

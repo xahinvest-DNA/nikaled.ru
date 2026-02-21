@@ -42,7 +42,7 @@ export const CasesSection = ({ title = "Наши работы", items }: Props) 
           ))}
         </div>
         <div className="mt-6">
-          <OpenCalcButton text="Рассчитать стоимость" />
+          <OpenCalcButton text="Получить расчёт сегодня" />
         </div>
       </div>
     </section>
