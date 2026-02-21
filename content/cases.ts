@@ -16,10 +16,10 @@ export const cases: CaseItem[] = [
     id: "shop-fashion",
     title: "Магазин одежды",
     task: "Сделать заметную вывеску с высокой читаемостью вечером.",
-    result: "Объёмные буквы с контражурной подсветкой.",
+    result: "Объёмные световые буквы на каркасе.",
     term: "10 дней",
     budget: "185 000 ₽",
-    image: "/images/real/case-1-v2.webp",
+    image: "/images/real/case-1-v3.png",
     services: ["obemnye-bukvy", "vyveski-voronezh"]
   },
   {
@@ -27,8 +27,8 @@ export const cases: CaseItem[] = [
     title: "Студия красоты",
     task: "Обновить фасад и повысить входящий поток.",
     result: "Световая вывеска + оформление входной группы.",
-    term: "8 дней",
-    budget: "120 000 ₽",
+    term: "7 дней",
+    budget: "27 000 ₽",
     image: "/images/real/case-2-v2.webp",
     services: ["vyveski-voronezh"]
   },

@@ -1,9 +1,9 @@
 import { LeadForm } from "@/components/forms/LeadForm";
 
 const rows = [
-  { name: "Объёмные буквы", price: "от 35 000 ₽" },
-  { name: "Световая вывеска", price: "от 45 000 ₽" },
-  { name: "Лайтбокс", price: "от 28 000 ₽" }
+  { name: "Объёмные буквы", price: "от 12 000 ₽" },
+  { name: "Световая вывеска", price: "от 10 000 ₽" },
+  { name: "Лайтбокс", price: "от 5 000 ₽" }
 ];
 
 type Props = {
