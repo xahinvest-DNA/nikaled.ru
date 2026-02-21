@@ -21,28 +21,34 @@ const toLeadText = (lead: LeadPayload) =>
 
 export const sendLeadToTelegram = async (lead: LeadPayload, file?: File) => {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const chatIdsRaw = process.env.TELEGRAM_CHAT_IDS || process.env.TELEGRAM_CHAT_ID || "";
+  const chatIds = chatIdsRaw
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
 
-  if (!token || !chatId) throw new Error("Telegram env is not configured");
+  if (!token || chatIds.length === 0) throw new Error("Telegram env is not configured");
 
   const leadText = toLeadText(lead);
 
-  if (file && file.size > 0) {
-    const form = new FormData();
-    form.append("chat_id", chatId);
-    form.append("document", file, file.name);
-    form.append("caption", "Файл к заявке");
-    await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: "POST", body: form });
-  }
+  for (const chatId of chatIds) {
+    if (file && file.size > 0) {
+      const form = new FormData();
+      form.append("chat_id", chatId);
+      form.append("document", file, file.name);
+      form.append("caption", "Файл к заявке");
+      await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: "POST", body: form });
+    }
 
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: leadText
-    })
-  });
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: leadText
+      })
+    });
+  }
 };
 
 export const sendLeadToEmail = async (lead: LeadPayload, file?: File) => {
@@ -92,4 +98,3 @@ export const sendLead = async (lead: LeadPayload, file?: File) => {
 
   await sendLeadToTelegram(lead, file);
 };
-
