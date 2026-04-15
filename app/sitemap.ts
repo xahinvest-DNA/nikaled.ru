@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 
 import { articles } from "@/content/articles";
+import { cases } from "@/content/cases";
+import { solutionPages } from "@/content/solutions";
 import { SITE_URL } from "@/lib/site";
 
 const routes = [
@@ -11,6 +13,7 @@ const routes = [
   "/soglasovanie-vyvesok/",
   "/portfolio/",
   "/blog/",
+  "/resheniya/",
   "/o-kompanii/",
   "/kontakty/"
 ] as const;
@@ -30,5 +33,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7
   }));
 
-  return [...staticRoutes, ...articleRoutes];
+  const solutionRoutes: MetadataRoute.Sitemap = solutionPages.map((page) => ({
+    url: `${SITE_URL}/resheniya/${page.slug}/`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.75
+  }));
+
+  const caseRoutes: MetadataRoute.Sitemap = cases.map((item) => ({
+    url: `${SITE_URL}/portfolio/${item.id}/`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.72
+  }));
+
+  return [...staticRoutes, ...articleRoutes, ...solutionRoutes, ...caseRoutes];
 }

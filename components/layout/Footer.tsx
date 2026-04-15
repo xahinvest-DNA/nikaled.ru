@@ -5,6 +5,7 @@ import { services } from "@/content/services";
 
 const pages = [
   { href: "/portfolio/", label: "Портфолио" },
+  { href: "/resheniya/", label: "Готовые решения" },
   { href: "/blog/", label: "Полезные материалы" },
   { href: "/o-kompanii/", label: "О компании" },
   { href: "/kontakty/", label: "Контакты" }

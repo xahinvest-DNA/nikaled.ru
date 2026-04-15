@@ -10,21 +10,29 @@ export const ArticleListSection = () => {
           <div>
             <h2 className="text-2xl font-bold text-steel md:text-3xl">Полезные материалы</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-steel/80">
-              Собираем практические разборы по вывескам, наружной рекламе, бюджетам и согласованию в Воронеже. Это помогает сайту
-              закрывать информационный спрос, а клиенту - быстрее принимать решение.
+              Здесь не просто список тем, а практические материалы по выбору вывески, бюджету и согласованию. На каждой карточке уже
+              есть короткие выводы, а внутри статьи - полноценный разбор, связанный с услугами и кейсами сайта.
             </p>
           </div>
           <Link href="/blog/" className="btn-secondary">
             Все материалы
           </Link>
         </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div className="mt-6 grid gap-4 xl:grid-cols-3">
           {articles.map((article) => (
             <article key={article.slug} className="card">
-              <p className="text-xs font-semibold uppercase tracking-wide text-steel/60">{article.readTime}</p>
-              <h3 className="mt-2 text-lg font-bold text-steel">{article.title}</h3>
+              <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-steel/60">
+                <span>{article.category}</span>
+                <span>{article.readTime}</span>
+              </div>
+              <h3 className="mt-3 text-lg font-bold text-steel">{article.title}</h3>
               <p className="mt-3 text-sm text-steel/80">{article.description}</p>
-              <Link href={`/blog/${article.slug}/`} className="btn-secondary mt-4">
+              <ul className="mt-4 space-y-2 text-sm text-steel/75">
+                {article.keyPoints.slice(0, 2).map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+              <Link href={`/blog/${article.slug}/`} className="btn-secondary mt-5">
                 Читать материал
               </Link>
             </article>

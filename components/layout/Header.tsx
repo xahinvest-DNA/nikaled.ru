@@ -10,6 +10,7 @@ const navItems = [
   { href: "/vyveski-voronezh/", label: "Вывески" },
   { href: "/obemnye-bukvy/", label: "Объёмные буквы" },
   { href: "/laitboksy/", label: "Лайтбоксы" },
+  { href: "/resheniya/", label: "Решения" },
   { href: "/portfolio/", label: "Портфолио" },
   { href: "/blog/", label: "Материалы" },
   { href: "/kontakty/", label: "Контакты" }

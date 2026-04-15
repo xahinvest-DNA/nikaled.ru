@@ -8,6 +8,7 @@ import { PricingSection } from "@/components/sections/PricingSection";
 import { SelfIdentify } from "@/components/sections/SelfIdentify";
 import { SeoContentSection } from "@/components/sections/SeoContentSection";
 import { ServicesGrid } from "@/components/sections/ServicesGrid";
+import { SolutionsEntrySection } from "@/components/sections/SolutionsEntrySection";
 import { StepsSection } from "@/components/sections/StepsSection";
 import { TrustSection } from "@/components/sections/TrustSection";
 import { getCasesByService } from "@/content/cases";
@@ -21,6 +22,7 @@ export const HomeLanding = () => {
         <Hero />
         <SelfIdentify />
         <ServicesGrid />
+        <SolutionsEntrySection />
         <SeoContentSection />
         <CasesSection items={getCasesByService(undefined, 4)} />
         <PricingSection />

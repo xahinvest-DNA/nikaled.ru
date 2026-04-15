@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Header } from "@/components/layout/Header";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { SmartImage } from "@/components/ui/SmartImage";
@@ -47,6 +49,9 @@ export default function PortfolioPage() {
               <p className="mt-3 text-sm text-steel/80">
                 Срок: <strong>{item.term}</strong>, бюджет: <strong>{item.budget}</strong>
               </p>
+              <Link href={`/portfolio/${item.id}/`} className="btn-secondary mt-4">
+                Открыть кейс
+              </Link>
             </article>
           ))}
         </div>

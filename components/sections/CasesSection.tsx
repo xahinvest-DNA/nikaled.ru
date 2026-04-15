@@ -1,7 +1,9 @@
-import { type CaseItem } from "@/content/cases";
-import { media } from "@/content/media";
+import Link from "next/link";
+
 import { OpenCalcButton } from "@/components/ui/OpenCalcButton";
 import { SmartImage } from "@/components/ui/SmartImage";
+import { type CaseItem } from "@/content/cases";
+import { media } from "@/content/media";
 
 type Props = {
   title?: string;
@@ -12,7 +14,12 @@ export const CasesSection = ({ title = "Наши работы", items }: Props) 
   return (
     <section className="section-space">
       <div className="container-narrow">
-        <h2 className="text-2xl font-bold text-steel md:text-3xl">{title}</h2>
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <h2 className="text-2xl font-bold text-steel md:text-3xl">{title}</h2>
+          <Link href="/portfolio/" className="text-sm font-semibold text-steel/80 hover:text-steel">
+            Смотреть все кейсы
+          </Link>
+        </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {items.map((item) => (
             <article key={item.id} className="card">
@@ -38,6 +45,9 @@ export const CasesSection = ({ title = "Наши работы", items }: Props) 
                 <span className="rounded bg-sky-100 px-2 py-1 text-steel">Срок: {item.term}</span>
                 <span className="rounded bg-orange-100 px-2 py-1 text-steel">Бюджет: {item.budget}</span>
               </div>
+              <Link href={`/portfolio/${item.id}/`} className="btn-secondary mt-4">
+                Открыть кейс
+              </Link>
             </article>
           ))}
         </div>
