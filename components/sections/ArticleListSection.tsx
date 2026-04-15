@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 import { articles } from "@/content/articles";
 
@@ -10,8 +10,8 @@ export const ArticleListSection = () => {
           <div>
             <h2 className="text-2xl font-bold text-steel md:text-3xl">Полезные материалы</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-steel/80">
-              Здесь не просто список тем, а практические материалы по выбору вывески, бюджету и согласованию. На каждой карточке уже
-              есть короткие выводы, а внутри статьи - полноценный разбор, связанный с услугами и кейсами сайта.
+              Здесь собрали практические материалы по выбору вывески, бюджету, фасаду и согласованию. Можно быстро разобраться в теме,
+              а потом уже выходить на расчёт с более понятной задачей.
             </p>
           </div>
           <Link href="/blog/" className="btn-secondary">
@@ -19,7 +19,7 @@ export const ArticleListSection = () => {
           </Link>
         </div>
         <div className="mt-6 grid gap-4 xl:grid-cols-3">
-          {articles.map((article) => (
+          {articles.slice(0, 6).map((article) => (
             <article key={article.slug} className="card">
               <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-steel/60">
                 <span>{article.category}</span>

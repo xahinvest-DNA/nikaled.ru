@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Header } from "@/components/layout/Header";
 import { StructuredData } from "@/components/seo/StructuredData";
+import { FaqSection } from "@/components/sections/FaqSection";
 import { articles, articlesMap } from "@/content/articles";
 import { services } from "@/content/services";
-import { buildBreadcrumbSchema } from "@/lib/structured-data";
+import { buildBreadcrumbSchema, buildFaqSchema } from "@/lib/structured-data";
 
 type BlogArticlePageProps = {
   params: Promise<{
@@ -43,7 +44,7 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
   }
 
   const relatedServices = services.filter((service) => article.relatedServiceSlugs.includes(service.slug));
-  const relatedArticles = articles.filter((item) => item.slug !== article.slug).slice(0, 2);
+  const relatedArticles = articles.filter((item) => item.slug !== article.slug).slice(0, 3);
 
   return (
     <>
@@ -54,6 +55,7 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
           { name: article.title, path: `/blog/${article.slug}/` }
         ])}
       />
+      <StructuredData data={buildFaqSchema(article.faqItems)} />
       <Header />
       <main className="container-narrow section-space pb-24 md:pb-16">
         <p className="text-sm font-semibold uppercase tracking-wide text-steel/60">
@@ -84,7 +86,7 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
             ))}
             <section className="card">
               <h2 className="text-xl font-bold text-steel">Что посмотреть дальше</h2>
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
+              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {relatedArticles.map((item) => (
                   <Link key={item.slug} href={`/blog/${item.slug}/`} className="rounded-xl border border-steel/10 px-4 py-4 text-sm text-steel/80 transition hover:border-steel/20">
                     <span className="block font-semibold text-steel">{item.title}</span>
@@ -120,6 +122,7 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
           </aside>
         </div>
       </main>
+      <FaqSection items={article.faqItems} />
     </>
   );
 }

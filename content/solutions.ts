@@ -1,3 +1,5 @@
+﻿import type { FaqItem } from "@/content/faq";
+
 export type SolutionPage = {
   slug: string;
   title: string;
@@ -10,6 +12,7 @@ export type SolutionPage = {
   pains: string[];
   deliverables: string[];
   relatedServiceSlugs: string[];
+  faqItems: FaqItem[];
 };
 
 export const solutionPages: SolutionPage[] = [
@@ -36,7 +39,24 @@ export const solutionPages: SolutionPage[] = [
       "Производство и монтаж под дедлайн открытия",
       "Помощь с согласованием, если объект этого требует"
     ],
-    relatedServiceSlugs: ["vyveski-voronezh", "obemnye-bukvy", "laitboksy"]
+    relatedServiceSlugs: ["vyveski-voronezh", "obemnye-bukvy", "laitboksy"],
+    faqItems: [
+      {
+        id: "solution-shop-1",
+        question: "С чего обычно начинается проект для магазина?",
+        answer: "Обычно с фото фасада, короткого разговора о формате магазина и примерных сроков открытия. После этого уже можно предложить подходящий формат и ориентир по бюджету."
+      },
+      {
+        id: "solution-shop-2",
+        question: "Можно ли уложиться в запуск без срыва сроков?",
+        answer: "Да, если не откладывать решение на последний момент и сразу пройти путь от замера до монтажа по нормальному плану."
+      },
+      {
+        id: "solution-shop-3",
+        question: "Что чаще подходит магазину: буквы или лайтбокс?",
+        answer: "Зависит от фасада и бюджета. Если важен более сильный образ, чаще выигрывают буквы. Если нужен понятный и практичный вариант, часто подходит лайтбокс или классическая световая вывеска."
+      }
+    ]
   },
   {
     slug: "vyveska-dlya-salona-krasoty-v-voronezhe",
@@ -61,7 +81,24 @@ export const solutionPages: SolutionPage[] = [
       "Монтаж без повреждения фасада",
       "Поддержка по срокам и документам"
     ],
-    relatedServiceSlugs: ["vyveski-voronezh", "obemnye-bukvy"]
+    relatedServiceSlugs: ["vyveski-voronezh", "obemnye-bukvy"],
+    faqItems: [
+      {
+        id: "solution-beauty-1",
+        question: "Что важнее для салона: внешний вид или заметность?",
+        answer: "Обычно важно и то и другое. Хорошее решение для салона не только видно с улицы, но и поддерживает ощущение аккуратного, ухоженного пространства."
+      },
+      {
+        id: "solution-beauty-2",
+        question: "Можно ли обновить не только вывеску, но и входную группу?",
+        answer: "Да. Для салонов это часто самый сильный вариант, потому что клиент видит не только название, а весь визуальный образ входа."
+      },
+      {
+        id: "solution-beauty-3",
+        question: "Как не сделать фасад слишком кричащим?",
+        answer: "Нужно подбирать формат и свет не шаблонно, а под конкретный фасад. Салонам чаще подходят более чистые и аккуратные решения без визуального шума."
+      }
+    ]
   },
   {
     slug: "vyveska-dlya-kafe-i-pekarni-v-voronezhe",
@@ -86,7 +123,24 @@ export const solutionPages: SolutionPage[] = [
       "Дизайн с учетом читаемости вывески на скорости",
       "Помощь с входной группой и дополнительной навигацией"
     ],
-    relatedServiceSlugs: ["laitboksy", "vyveski-voronezh"]
+    relatedServiceSlugs: ["laitboksy", "vyveski-voronezh"],
+    faqItems: [
+      {
+        id: "solution-cafe-1",
+        question: "Что важнее для кафе: вывеска на фасаде или кронштейн?",
+        answer: "Часто лучше работает связка. Фасадная вывеска считывает название прямо перед объектом, а кронштейн помогает замечать точку сбоку по ходу движения."
+      },
+      {
+        id: "solution-cafe-2",
+        question: "Подсветка для кафе обязательна?",
+        answer: "Если заведение работает во второй половине дня и вечером, подсветка почти всегда полезна. Без неё точка теряет заметность именно в часы, когда поток ещё активен."
+      },
+      {
+        id: "solution-cafe-3",
+        question: "Можно ли сделать заметно, но без большого бюджета?",
+        answer: "Да. Для кафе и пекарен часто можно подобрать компактный световой формат, который работает на поток и не раздувает смету."
+      }
+    ]
   },
   {
     slug: "vyveska-dlya-apteki-v-voronezhe",
@@ -111,7 +165,24 @@ export const solutionPages: SolutionPage[] = [
       "При необходимости - помощь с согласованием",
       "Дополнительные элементы навигации для потока"
     ],
-    relatedServiceSlugs: ["vyveski-voronezh", "laitboksy", "soglasovanie-vyvesok"]
+    relatedServiceSlugs: ["vyveski-voronezh", "laitboksy", "soglasovanie-vyvesok"],
+    faqItems: [
+      {
+        id: "solution-pharmacy-1",
+        question: "Что важнее для аптеки: яркость или понятность?",
+        answer: "Понятность. Вывеска должна быстро считываться и не вызывать лишнего визуального шума. Яркость нужна, но только в разумных пределах."
+      },
+      {
+        id: "solution-pharmacy-2",
+        question: "Нужны ли дополнительные навигационные элементы?",
+        answer: "Часто да. Если объект плохо просматривается с тротуара или дороги, дополнительные элементы могут заметно упростить поиск точки."
+      },
+      {
+        id: "solution-pharmacy-3",
+        question: "Можно ли сделать проект под строгие требования по фасаду?",
+        answer: "Да. В таких проектах важно сразу учитывать ограничения и не запускать производство без проверки по размещению."
+      }
+    ]
   },
   {
     slug: "vyveska-dlya-ofisa-i-kompanii-v-voronezhe",
@@ -136,7 +207,24 @@ export const solutionPages: SolutionPage[] = [
       "При необходимости - помощь по согласованию",
       "Гарантия на материалы и монтаж"
     ],
-    relatedServiceSlugs: ["obemnye-bukvy", "vyveski-voronezh", "soglasovanie-vyvesok"]
+    relatedServiceSlugs: ["obemnye-bukvy", "vyveski-voronezh", "soglasovanie-vyvesok"],
+    faqItems: [
+      {
+        id: "solution-office-1",
+        question: "Что чаще выбирают для офиса: табличку или объёмные буквы?",
+        answer: "Если нужен более сильный фасадный образ, чаще выбирают объёмные буквы. Если задача только обозначить вход, иногда достаточно аккуратной таблички или компактной вывески."
+      },
+      {
+        id: "solution-office-2",
+        question: "Можно ли сделать без визуального перегруза?",
+        answer: "Да. Для офисов это как раз базовая задача: сохранить чистый фасад и при этом сделать компанию заметной и понятной для посетителей."
+      },
+      {
+        id: "solution-office-3",
+        question: "Подходит ли такое решение для шоурума или представительства?",
+        answer: "Да. Для шоурумов и представительств особенно важен аккуратный фирменный вид, и такие проекты хорошо решаются через буквы, входную группу и фасадные элементы."
+      }
+    ]
   }
 ];
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -6,12 +6,13 @@ import { LeadForm } from "@/components/forms/LeadForm";
 import { Header } from "@/components/layout/Header";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { CasesSection } from "@/components/sections/CasesSection";
+import { FaqSection } from "@/components/sections/FaqSection";
 import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
 import { StepsSection } from "@/components/sections/StepsSection";
 import { getCasesByService } from "@/content/cases";
 import { services } from "@/content/services";
 import { solutionPages, solutionPagesMap } from "@/content/solutions";
-import { buildBreadcrumbSchema } from "@/lib/structured-data";
+import { buildBreadcrumbSchema, buildFaqSchema } from "@/lib/structured-data";
 
 type SolutionPageProps = {
   params: Promise<{
@@ -58,6 +59,7 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
           { name: page.title, path: `/${page.slug}/` }
         ])}
       />
+      <StructuredData data={buildFaqSchema(page.faqItems)} />
       <Header />
       <main className="pb-24 md:pb-0">
         <section className="section-space bg-[radial-gradient(circle_at_20%_20%,#e0f2fe_0%,#f8fafc_55%,#ffffff_100%)]">
@@ -115,6 +117,7 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
         </section>
 
         <CasesSection title="Релевантные кейсы" items={uniqueCaseItems} />
+        <FaqSection items={page.faqItems} />
         <StepsSection />
         <FinalCtaSection />
       </main>
