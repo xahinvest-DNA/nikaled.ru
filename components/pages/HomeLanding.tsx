@@ -1,15 +1,17 @@
+import { Header } from "@/components/layout/Header";
+import { ArticleListSection } from "@/components/sections/ArticleListSection";
+import { CasesSection } from "@/components/sections/CasesSection";
+import { FaqSection } from "@/components/sections/FaqSection";
+import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
+import { Hero } from "@/components/sections/Hero";
+import { PricingSection } from "@/components/sections/PricingSection";
+import { SelfIdentify } from "@/components/sections/SelfIdentify";
+import { SeoContentSection } from "@/components/sections/SeoContentSection";
+import { ServicesGrid } from "@/components/sections/ServicesGrid";
+import { StepsSection } from "@/components/sections/StepsSection";
+import { TrustSection } from "@/components/sections/TrustSection";
 import { getCasesByService } from "@/content/cases";
 import { faqItems } from "@/content/faq";
-import { Header } from "@/components/layout/Header";
-import { Hero } from "@/components/sections/Hero";
-import { SelfIdentify } from "@/components/sections/SelfIdentify";
-import { ServicesGrid } from "@/components/sections/ServicesGrid";
-import { CasesSection } from "@/components/sections/CasesSection";
-import { PricingSection } from "@/components/sections/PricingSection";
-import { StepsSection } from "@/components/sections/StepsSection";
-import { FaqSection } from "@/components/sections/FaqSection";
-import { TrustSection } from "@/components/sections/TrustSection";
-import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
 
 export const HomeLanding = () => {
   return (
@@ -19,9 +21,11 @@ export const HomeLanding = () => {
         <Hero />
         <SelfIdentify />
         <ServicesGrid />
+        <SeoContentSection />
         <CasesSection items={getCasesByService(undefined, 4)} />
         <PricingSection />
         <StepsSection />
+        <ArticleListSection />
         <FaqSection items={faqItems} />
         <TrustSection />
         <FinalCtaSection />
@@ -29,4 +33,3 @@ export const HomeLanding = () => {
     </>
   );
 };
-

@@ -1,8 +1,8 @@
 "use client";
 
+import { OpenCalcButton } from "@/components/ui/OpenCalcButton";
 import { contacts } from "@/content/contacts";
 import { trackEvent } from "@/lib/analytics/events";
-import { OpenCalcButton } from "@/components/ui/OpenCalcButton";
 
 export const MobileBottomBar = () => {
   return (
@@ -15,9 +15,8 @@ export const MobileBottomBar = () => {
         >
           Позвонить
         </a>
-        <OpenCalcButton text="Рассчитать" className="btn-primary flex-1" />
+        <OpenCalcButton text="Получить расчёт" className="btn-primary flex-1" />
       </div>
     </div>
   );
 };
-

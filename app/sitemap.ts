@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
+import { articles } from "@/content/articles";
+import { SITE_URL } from "@/lib/site";
 
 const routes = [
   "/",
@@ -9,16 +10,25 @@ const routes = [
   "/laitboksy/",
   "/soglasovanie-vyvesok/",
   "/portfolio/",
+  "/blog/",
   "/o-kompanii/",
   "/kontakty/"
-];
+] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return routes.map((route) => ({
-    url: `${siteUrl}${route}`,
+  const staticRoutes: MetadataRoute.Sitemap = routes.map((route) => ({
+    url: `${SITE_URL}${route}`,
     lastModified: new Date(),
-    changeFrequency: "weekly",
+    changeFrequency: route === "/" ? "daily" : "weekly",
     priority: route === "/" ? 1 : 0.8
   }));
-}
 
+  const articleRoutes: MetadataRoute.Sitemap = articles.map((article) => ({
+    url: `${SITE_URL}/blog/${article.slug}/`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.7
+  }));
+
+  return [...staticRoutes, ...articleRoutes];
+}

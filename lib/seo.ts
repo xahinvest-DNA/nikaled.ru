@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
 
 export const buildPageMetadata = (title: string, description: string, path: string): Metadata => ({
   title,
@@ -9,8 +9,7 @@ export const buildPageMetadata = (title: string, description: string, path: stri
   openGraph: {
     title,
     description,
-    url: `${siteUrl}${path}`,
-    images: [{ url: "/images/og-cover.svg", width: 1200, height: 630 }]
+    url: `${SITE_URL}${path}`,
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }]
   }
 });
-

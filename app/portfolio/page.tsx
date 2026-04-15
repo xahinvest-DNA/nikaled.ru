@@ -1,8 +1,10 @@
 import { Header } from "@/components/layout/Header";
+import { StructuredData } from "@/components/seo/StructuredData";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { cases } from "@/content/cases";
 import { media } from "@/content/media";
 import { buildPageMetadata } from "@/lib/seo";
+import { buildBreadcrumbSchema } from "@/lib/structured-data";
 
 export const metadata = buildPageMetadata(
   "Портфолио наружной рекламы в Воронеже",
@@ -13,10 +15,14 @@ export const metadata = buildPageMetadata(
 export default function PortfolioPage() {
   return (
     <>
+      <StructuredData data={buildBreadcrumbSchema([{ name: "Главная", path: "" }, { name: "Портфолио", path: "/portfolio/" }])} />
       <Header />
       <main className="container-narrow section-space pb-24 md:pb-16">
         <h1 className="text-3xl font-black text-ink md:text-5xl">Портфолио</h1>
-        <p className="mt-3 text-sm text-steel/80">Реальные кейсы с задачей, сроками и бюджетом.</p>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-steel/80">
+          Реальные кейсы по наружной рекламе в Воронеже: от вывесок и объёмных букв до согласования и оформления входных групп.
+          Показываем не только картинку, но и задачу бизнеса, решение, срок и бюджет проекта.
+        </p>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {cases.map((item) => (
             <article key={item.id} className="card">
@@ -32,8 +38,13 @@ export default function PortfolioPage() {
                 />
               </div>
               <h2 className="mt-4 text-xl font-bold text-steel">{item.title}</h2>
-              <p className="mt-1 text-sm text-steel/80">{item.task}</p>
               <p className="mt-1 text-sm text-steel/80">
+                <span className="font-semibold">Задача:</span> {item.task}
+              </p>
+              <p className="mt-1 text-sm text-steel/80">
+                <span className="font-semibold">Решение:</span> {item.result}
+              </p>
+              <p className="mt-3 text-sm text-steel/80">
                 Срок: <strong>{item.term}</strong>, бюджет: <strong>{item.budget}</strong>
               </p>
             </article>

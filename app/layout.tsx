@@ -2,26 +2,54 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Suspense } from "react";
 
-import { contacts } from "@/content/contacts";
 import { CalculatorModalHost } from "@/components/forms/CalculatorModalHost";
+import { Footer } from "@/components/layout/Footer";
 import { MobileBottomBar } from "@/components/layout/MobileBottomBar";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { contacts } from "@/content/contacts";
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/site";
+import { buildLocalBusinessSchema, buildWebsiteSchema } from "@/lib/structured-data";
 
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: "Наружная реклама в Воронеже под ключ",
-  description: "Вывески, объёмные буквы, лайтбоксы в Воронеже. От проекта до монтажа за 7-14 дней. Гарантия 24 месяца.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Вывески и наружная реклама в Воронеже под ключ",
+    template: "%s | Nikaled"
+  },
+  description:
+    "Вывески, объёмные буквы, лайтбоксы и согласование в Воронеже. Берём на себя замер, дизайн, производство, монтаж и документы.",
+  keywords: [
+    "наружная реклама Воронеж",
+    "вывески Воронеж",
+    "объемные буквы Воронеж",
+    "лайтбоксы Воронеж",
+    "согласование вывесок Воронеж",
+    "изготовление вывесок Воронеж"
+  ],
+  alternates: {
+    canonical: "/"
+  },
   openGraph: {
-    title: "Наружная реклама в Воронеже под ключ",
-    description: "Рассчитаем стоимость сегодня. Ответим в течение 10 минут.",
-    url: siteUrl,
-    siteName: contacts.companyName,
+    title: "Вывески и наружная реклама в Воронеже под ключ",
+    description: "Рассчитаем бюджет, подготовим дизайн, произведем и смонтируем без срывов сроков.",
+    url: SITE_URL,
+    siteName: SITE_NAME,
     locale: "ru_RU",
     type: "website",
-    images: [{ url: "/images/og-cover.svg", width: 1200, height: 630, alt: "Наружная реклама в Воронеже" }]
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: "Наружная реклама в Воронеже" }]
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1
+    }
   },
   icons: {
     icon: "/favicon.svg"
@@ -35,7 +63,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru">
       <body>
+        <StructuredData data={buildLocalBusinessSchema()} />
+        <StructuredData data={buildWebsiteSchema()} />
         {children}
+        <Footer />
         <Suspense fallback={null}>
           <CalculatorModalHost />
         </Suspense>
