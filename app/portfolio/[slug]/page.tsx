@@ -10,12 +10,19 @@ import { media } from "@/content/media";
 import { services } from "@/content/services";
 import { buildBreadcrumbSchema } from "@/lib/structured-data";
 
+type PortfolioCasePageProps = {
+  params: Promise<{
+    slug: string;
+  }>;
+};
+
 export function generateStaticParams() {
   return cases.map((item) => ({ slug: item.id }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const item = casesMap[params.slug];
+export async function generateMetadata({ params }: PortfolioCasePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const item = casesMap[slug];
   if (!item) {
     return {};
   }
@@ -29,8 +36,9 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function PortfolioCasePage({ params }: { params: { slug: string } }) {
-  const item = casesMap[params.slug];
+export default async function PortfolioCasePage({ params }: PortfolioCasePageProps) {
+  const { slug } = await params;
+  const item = casesMap[slug];
   if (!item) {
     notFound();
   }

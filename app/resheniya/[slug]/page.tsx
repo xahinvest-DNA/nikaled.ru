@@ -13,12 +13,19 @@ import { services } from "@/content/services";
 import { solutionPages, solutionPagesMap } from "@/content/solutions";
 import { buildBreadcrumbSchema } from "@/lib/structured-data";
 
+type SolutionPageProps = {
+  params: Promise<{
+    slug: string;
+  }>;
+};
+
 export function generateStaticParams() {
   return solutionPages.map((page) => ({ slug: page.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const page = solutionPagesMap[params.slug];
+export async function generateMetadata({ params }: SolutionPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const page = solutionPagesMap[slug];
   if (!page) {
     return {};
   }
@@ -32,14 +39,15 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function SolutionPage({ params }: { params: { slug: string } }) {
-  const page = solutionPagesMap[params.slug];
+export default async function SolutionPage({ params }: SolutionPageProps) {
+  const { slug } = await params;
+  const page = solutionPagesMap[slug];
   if (!page) {
     notFound();
   }
 
   const relatedServices = services.filter((service) => page.relatedServiceSlugs.includes(service.slug));
-  const caseItems = page.relatedServiceSlugs.flatMap((slug) => getCasesByService(slug as (typeof services)[number]["slug"], 2));
+  const caseItems = page.relatedServiceSlugs.flatMap((serviceSlug) => getCasesByService(serviceSlug as (typeof services)[number]["slug"], 2));
   const uniqueCaseItems = caseItems.filter((item, index, array) => array.findIndex((candidate) => candidate.id === item.id) === index).slice(0, 4);
 
   return (

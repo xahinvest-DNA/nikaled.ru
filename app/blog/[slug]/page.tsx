@@ -8,12 +8,19 @@ import { articles, articlesMap } from "@/content/articles";
 import { services } from "@/content/services";
 import { buildBreadcrumbSchema } from "@/lib/structured-data";
 
+type BlogArticlePageProps = {
+  params: Promise<{
+    slug: string;
+  }>;
+};
+
 export function generateStaticParams() {
   return articles.map((article) => ({ slug: article.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const article = articlesMap[params.slug];
+export async function generateMetadata({ params }: BlogArticlePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const article = articlesMap[slug];
   if (!article) {
     return {};
   }
@@ -27,8 +34,9 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function BlogArticlePage({ params }: { params: { slug: string } }) {
-  const article = articlesMap[params.slug];
+export default async function BlogArticlePage({ params }: BlogArticlePageProps) {
+  const { slug } = await params;
+  const article = articlesMap[slug];
 
   if (!article) {
     notFound();
