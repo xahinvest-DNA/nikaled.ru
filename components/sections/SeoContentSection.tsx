@@ -49,7 +49,7 @@ export const SeoContentSection = () => {
             </ul>
           </article>
           <article className="card border border-steel/10">
-            <h3 className="text-lg font-bold text-steel">Почему это повышает конверсию</h3>
+            <h3 className="text-lg font-bold text-steel">Что это даёт клиенту</h3>
             <ul className="mt-4 space-y-2 text-sm text-steel/80">
               {risks.map((item) => (
                 <li key={item}>{item}</li>
@@ -59,8 +59,8 @@ export const SeoContentSection = () => {
         </div>
         <div className="mt-6 rounded-2xl border border-steel/10 bg-paper p-6">
           <p className="text-sm text-steel/85">
-            Для коммерческих запросов и быстрого выбора мы вынесли отдельные посадочные по ключевым услугам. Если вы уже понимаете,
-            какая конструкция нужна, переходите сразу в нужный раздел:
+            Если вы уже примерно понимаете, что нужно, можно сразу перейти в нужный раздел и посмотреть цены, примеры работ и
+            особенности конкретного решения:
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href="/vyveski-voronezh/" className="btn-secondary px-4 py-2">
