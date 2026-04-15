@@ -1,6 +1,6 @@
 "use client";
 
-export type AnalyticsEvent = "submit_lead" | "click_call" | "click_whatsapp" | "click_telegram" | "open_calculator";
+export type AnalyticsEvent = "submit_lead" | "click_call" | "click_telegram" | "open_calculator";
 
 declare global {
   interface Window {

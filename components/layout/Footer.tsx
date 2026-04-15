@@ -1,7 +1,10 @@
+﻿"use client";
+
 import Link from "next/link";
 
 import { contacts } from "@/content/contacts";
 import { services } from "@/content/services";
+import { trackEvent } from "@/lib/analytics/events";
 
 const pages = [
   { href: "/portfolio/", label: "Портфолио" },
@@ -23,7 +26,11 @@ export const Footer = () => {
             Вывески, объёмные буквы, лайтбоксы и согласование в Воронеже. Берём на себя замер, дизайн, производство,
             монтаж и документы.
           </p>
-          <a href={`tel:${contacts.phoneRaw}`} className="mt-4 inline-block text-2xl font-black text-steel">
+          <a
+            href={`tel:${contacts.phoneRaw}`}
+            className="mt-4 inline-block text-2xl font-black text-steel"
+            onClick={() => trackEvent("click_call", { section: "footer" })}
+          >
             {contacts.phoneDisplay}
           </a>
           <p className="mt-2 text-sm text-steel/70">
@@ -56,11 +63,14 @@ export const Footer = () => {
             ))}
           </ul>
           <div className="mt-5 flex flex-wrap gap-2">
-            <a href={contacts.telegramUrl} target="_blank" rel="noreferrer" className="btn-secondary px-4 py-2">
+            <a
+              href={contacts.telegramUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-secondary px-4 py-2"
+              onClick={() => trackEvent("click_telegram", { section: "footer" })}
+            >
               Telegram
-            </a>
-            <a href={contacts.whatsappUrl} target="_blank" rel="noreferrer" className="btn-secondary px-4 py-2">
-              WhatsApp
             </a>
           </div>
         </div>

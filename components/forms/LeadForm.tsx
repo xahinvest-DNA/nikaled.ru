@@ -94,9 +94,6 @@ export const LeadForm = ({ title = "Рассчитать стоимость", bu
           <a href={contacts.telegramUrl} className="btn-secondary" target="_blank" rel="noreferrer" onClick={() => trackEvent("click_telegram")}>
             Написать в Telegram
           </a>
-          <a href={contacts.whatsappUrl} className="btn-primary" target="_blank" rel="noreferrer" onClick={() => trackEvent("click_whatsapp")}>
-            Написать в WhatsApp
-          </a>
         </div>
       </div>
     );

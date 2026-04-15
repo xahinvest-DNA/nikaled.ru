@@ -1,7 +1,10 @@
+﻿"use client";
+
 import { OpenCalcButton } from "@/components/ui/OpenCalcButton";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { contacts } from "@/content/contacts";
 import { media } from "@/content/media";
+import { trackEvent } from "@/lib/analytics/events";
 
 export const Hero = () => {
   return (
@@ -19,7 +22,11 @@ export const Hero = () => {
           </p>
           <div className="flex flex-wrap gap-3">
             <OpenCalcButton text="Получить расчёт и понять бюджет" />
-            <a href={`tel:${contacts.phoneRaw}`} className="btn-secondary">
+            <a
+              href={`tel:${contacts.phoneRaw}`}
+              className="btn-secondary"
+              onClick={() => trackEvent("click_call", { section: "hero" })}
+            >
               Получить консультацию
             </a>
           </div>

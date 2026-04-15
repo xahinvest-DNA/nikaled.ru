@@ -9,9 +9,6 @@ export const MessengerButtons = () => {
       <a href={contacts.telegramUrl} className="btn-secondary" target="_blank" rel="noreferrer" onClick={() => trackEvent("click_telegram")}>
         Telegram
       </a>
-      <a href={contacts.whatsappUrl} className="btn-secondary" target="_blank" rel="noreferrer" onClick={() => trackEvent("click_whatsapp")}>
-        WhatsApp
-      </a>
     </div>
   );
 };

@@ -1,5 +1,8 @@
+﻿"use client";
+
 import { LeadForm } from "@/components/forms/LeadForm";
 import { contacts } from "@/content/contacts";
+import { trackEvent } from "@/lib/analytics/events";
 
 type Props = {
   service?: string;
@@ -17,7 +20,11 @@ export const FinalCtaSection = ({ service }: Props) => {
             Отправьте задачу в свободной форме. Мы быстро скажем, какой формат конструкции подойдет, сколько это будет стоить и что
             нужно предусмотреть по срокам и документам.
           </p>
-          <a href={`tel:${contacts.phoneRaw}`} className="mt-5 inline-block text-3xl font-black text-white">
+          <a
+            href={`tel:${contacts.phoneRaw}`}
+            className="mt-5 inline-block text-3xl font-black text-white"
+            onClick={() => trackEvent("click_call", { section: "final_cta" })}
+          >
             {contacts.phoneDisplay}
           </a>
           <p className="mt-2 text-sm text-white/75">Если проект срочный, лучше сразу звоните. Подскажем реальный срок запуска.</p>
