@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -83,6 +83,10 @@ export default async function PortfolioCasePage({ params }: PortfolioCasePagePro
               <h2 className="text-xl font-bold text-steel">Что сделали</h2>
               <p className="mt-4 text-sm leading-6 text-steel/80 md:text-base">{item.resultExpanded}</p>
             </section>
+            <section className="card bg-white">
+              <h2 className="text-xl font-bold text-steel">Что получил клиент</h2>
+              <p className="mt-4 text-sm leading-6 text-steel/80 md:text-base">{item.outcome}</p>
+            </section>
             <section className="card">
               <h2 className="text-xl font-bold text-steel">Ключевые акценты проекта</h2>
               <ul className="mt-4 space-y-2 text-sm leading-6 text-steel/80 md:text-base">
@@ -90,6 +94,16 @@ export default async function PortfolioCasePage({ params }: PortfolioCasePagePro
                   <li key={point}>{point}</li>
                 ))}
               </ul>
+            </section>
+            <section className="card">
+              <h2 className="text-xl font-bold text-steel">Для каких задач подходит похожее решение</h2>
+              <div className="mt-4 flex flex-wrap gap-2 text-sm text-steel/75">
+                {item.bestFor.map((tag) => (
+                  <span key={tag} className="rounded-full border border-steel/10 px-3 py-2">
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </section>
             <section className="card">
               <h2 className="text-xl font-bold text-steel">Другие кейсы</h2>

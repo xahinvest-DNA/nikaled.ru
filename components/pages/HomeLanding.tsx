@@ -1,10 +1,11 @@
-import { Header } from "@/components/layout/Header";
+﻿import { Header } from "@/components/layout/Header";
 import { ArticleListSection } from "@/components/sections/ArticleListSection";
 import { CasesSection } from "@/components/sections/CasesSection";
 import { FaqSection } from "@/components/sections/FaqSection";
 import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
 import { Hero } from "@/components/sections/Hero";
 import { PricingSection } from "@/components/sections/PricingSection";
+import { QuickRequestSection } from "@/components/sections/QuickRequestSection";
 import { SelfIdentify } from "@/components/sections/SelfIdentify";
 import { SeoContentSection } from "@/components/sections/SeoContentSection";
 import { ServicesGrid } from "@/components/sections/ServicesGrid";
@@ -21,6 +22,7 @@ export const HomeLanding = () => {
       <main className="pb-24 md:pb-0">
         <Hero />
         <SelfIdentify />
+        <QuickRequestSection />
         <ServicesGrid />
         <SolutionsEntrySection />
         <SeoContentSection />

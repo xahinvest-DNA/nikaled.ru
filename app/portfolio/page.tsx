@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 import { Header } from "@/components/layout/Header";
 import { StructuredData } from "@/components/seo/StructuredData";
@@ -23,7 +23,7 @@ export default function PortfolioPage() {
         <h1 className="text-3xl font-black text-ink md:text-5xl">Портфолио</h1>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-steel/80">
           Реальные кейсы по наружной рекламе в Воронеже: от вывесок и объёмных букв до согласования и оформления входных групп.
-          Показываем не только картинку, но и задачу бизнеса, решение, срок и бюджет проекта.
+          Показываем не только картинку, но и задачу бизнеса, решение, срок, бюджет и что получил клиент в итоге.
         </p>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {cases.map((item) => (
@@ -46,9 +46,19 @@ export default function PortfolioPage() {
               <p className="mt-1 text-sm text-steel/80">
                 <span className="font-semibold">Решение:</span> {item.result}
               </p>
+              <p className="mt-3 rounded-xl border border-steel/10 bg-paper px-4 py-3 text-sm leading-6 text-steel/85">
+                <span className="font-semibold text-steel">Что получил клиент:</span> {item.outcome}
+              </p>
               <p className="mt-3 text-sm text-steel/80">
                 Срок: <strong>{item.term}</strong>, бюджет: <strong>{item.budget}</strong>
               </p>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs text-steel/75">
+                {item.bestFor.slice(0, 3).map((tag) => (
+                  <span key={tag} className="rounded-full border border-steel/10 px-2 py-1">
+                    {tag}
+                  </span>
+                ))}
+              </div>
               <Link href={`/portfolio/${item.id}/`} className="btn-secondary mt-4">
                 Открыть кейс
               </Link>
