@@ -1,4 +1,4 @@
-import { OpenCalcButton } from "@/components/ui/OpenCalcButton";
+﻿import { OpenCalcButton } from "@/components/ui/OpenCalcButton";
 
 const items = [
   {
@@ -23,11 +23,10 @@ export const SelfIdentify = () => {
   return (
     <section className="section-space">
       <div className="container-narrow card">
-        <h2 className="text-2xl font-bold text-steel md:text-3xl">Сайт будет полезен, если вам нужен подрядчик, а не просто производство</h2>
-        <p className="mt-3 max-w-3xl text-sm text-steel/80">
+        <h2 className="text-2xl font-bold text-steel md:text-3xl">
           Мы берем проект на себя целиком и помогаем пройти путь от идеи до работающей вывески без срывов, ошибок в размерах и
           неприятных сюрпризов после монтажа.
-        </p>
+        </h2>
         <ul className="mt-5 grid gap-3 md:grid-cols-2">
           {items.map((item) => (
             <li key={item.title} className="rounded-xl border border-steel/10 bg-paper px-4 py-4">
