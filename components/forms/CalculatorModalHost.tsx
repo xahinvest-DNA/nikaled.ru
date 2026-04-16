@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 
@@ -76,7 +76,9 @@ export const CalculatorModalHost = () => {
       const response = await fetch("/api/lead", { method: "POST", body: formData });
       if (!response.ok) throw new Error("failed");
       setState("success");
-      trackEvent("submit_lead", { source: "calculator", page: pathname });
+      const params = { source: "calculator", page: pathname, service: data.service };
+      trackEvent("submit_lead", params);
+      trackEvent("submit_calculator", params);
     } catch {
       setState("error");
       setError("Не удалось отправить заявку.");
@@ -203,4 +205,3 @@ export const CalculatorModalHost = () => {
     </div>
   );
 };
-

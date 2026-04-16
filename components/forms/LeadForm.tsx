@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { contacts } from "@/content/contacts";
 import { trackEvent } from "@/lib/analytics/events";
@@ -11,11 +11,18 @@ type Props = {
   buttonText?: string;
   service?: string;
   compact?: boolean;
+  analyticsSource?: string;
 };
 
 const RATE_LIMIT_MS = 45_000;
 
-export const LeadForm = ({ title = "Рассчитать стоимость", buttonText = "Отправить заявку", service, compact }: Props) => {
+export const LeadForm = ({
+  title = "Рассчитать стоимость",
+  buttonText = "Отправить заявку",
+  service,
+  compact,
+  analyticsSource = "lead_form"
+}: Props) => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+7");
   const [context, setContext] = useState("");
@@ -23,6 +30,17 @@ export const LeadForm = ({ title = "Рассчитать стоимость", bu
   const [file, setFile] = useState<File | null>(null);
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState("");
+  const startedRef = useRef(false);
+
+  const trackStart = () => {
+    if (startedRef.current || typeof window === "undefined") return;
+    startedRef.current = true;
+    trackEvent("start_lead_form", {
+      source: analyticsSource,
+      service: service || "unknown",
+      page: window.location.pathname
+    });
+  };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -75,7 +93,9 @@ export const LeadForm = ({ title = "Рассчитать стоимость", bu
 
       window.localStorage.setItem("lead_last_submit_at", String(now));
       setState("success");
-      trackEvent("submit_lead", { service: service || "unknown", page: pathname });
+      const params = { source: analyticsSource, service: service || "unknown", page: pathname };
+      trackEvent("submit_lead", params);
+      trackEvent("submit_lead_form", params);
     } catch {
       setState("error");
       setError("Не удалось отправить заявку. Попробуйте еще раз или позвоните нам.");
@@ -88,10 +108,20 @@ export const LeadForm = ({ title = "Рассчитать стоимость", bu
         <h3 className="text-xl font-bold text-steel">Спасибо, заявка отправлена</h3>
         <p className="mt-2 text-sm text-steel/80">Ответим в течение 10 минут. Можете сразу выбрать удобный канал связи:</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <a href={`tel:${contacts.phoneRaw}`} className="btn-secondary" onClick={() => trackEvent("click_call")}>
+          <a
+            href={`tel:${contacts.phoneRaw}`}
+            className="btn-secondary"
+            onClick={() => trackEvent("click_call", { section: `${analyticsSource}_success` })}
+          >
             Позвонить
           </a>
-          <a href={contacts.telegramUrl} className="btn-secondary" target="_blank" rel="noreferrer" onClick={() => trackEvent("click_telegram")}>
+          <a
+            href={contacts.telegramUrl}
+            className="btn-secondary"
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => trackEvent("click_telegram", { section: `${analyticsSource}_success` })}
+          >
             Написать в Telegram
           </a>
         </div>
@@ -108,6 +138,7 @@ export const LeadForm = ({ title = "Рассчитать стоимость", bu
         placeholder="Ваше имя (опционально)"
         className="w-full rounded-lg border border-steel/15 px-3 py-2 text-sm outline-none focus:border-steel/35"
         value={name}
+        onFocus={trackStart}
         onChange={(e) => setName(e.target.value)}
       />
       <input
@@ -116,6 +147,7 @@ export const LeadForm = ({ title = "Рассчитать стоимость", bu
         placeholder="+7 (___) ___-__-__"
         className="w-full rounded-lg border border-steel/15 px-3 py-2 text-sm outline-none focus:border-steel/35"
         value={phone}
+        onFocus={trackStart}
         onChange={(e) => setPhone(formatPhoneRu(e.target.value))}
       />
       <textarea
@@ -124,11 +156,17 @@ export const LeadForm = ({ title = "Рассчитать стоимость", bu
         placeholder="Опишите задачу: тип вывески, размеры, адрес, сроки"
         className="w-full rounded-lg border border-steel/15 px-3 py-2 text-sm outline-none focus:border-steel/35"
         value={context}
+        onFocus={trackStart}
         onChange={(e) => setContext(e.target.value)}
       />
       <label className="block text-sm text-steel/85">
         Фото/файл (опционально)
-        <input type="file" className="mt-1 block w-full text-xs" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+        <input
+          type="file"
+          className="mt-1 block w-full text-xs"
+          onClick={trackStart}
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+        />
       </label>
       <input
         type="text"
@@ -147,4 +185,3 @@ export const LeadForm = ({ title = "Рассчитать стоимость", bu
     </form>
   );
 };
-

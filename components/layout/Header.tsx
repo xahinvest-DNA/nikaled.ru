@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 
@@ -36,11 +36,11 @@ export const Header = () => {
           <a
             href={`tel:${contacts.phoneRaw}`}
             className="hidden text-sm font-semibold text-steel lg:block"
-            onClick={() => trackEvent("click_call")}
+            onClick={() => trackEvent("click_call", { section: "header" })}
           >
             {contacts.phoneDisplay}
           </a>
-          <OpenCalcButton text="Получить расчёт" className="btn-primary px-4 py-2" />
+          <OpenCalcButton text="Получить расчёт" className="btn-primary px-4 py-2" analyticsSource="header" />
         </div>
       </div>
     </header>
