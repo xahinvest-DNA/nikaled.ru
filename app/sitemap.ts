@@ -1,4 +1,4 @@
-import type { MetadataRoute } from "next";
+﻿import type { MetadataRoute } from "next";
 
 import { articles } from "@/content/articles";
 import { cases } from "@/content/cases";
@@ -11,6 +11,7 @@ const routes = [
   "/obemnye-bukvy/",
   "/laitboksy/",
   "/soglasovanie-vyvesok/",
+  "/otdelka-fasadov/",
   "/portfolio/",
   "/blog/",
   "/resheniya/",

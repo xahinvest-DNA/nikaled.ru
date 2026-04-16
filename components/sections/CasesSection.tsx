@@ -18,7 +18,7 @@ export const CasesSection = ({ title = "Наши работы", items }: Props) 
           <div>
             <h2 className="text-2xl font-bold text-steel md:text-3xl">{title}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-steel/80">
-              Показываем не только фото, но и что именно получил клиент по сроку, фасаду и результату для точки.
+              Показываем не только фото, но и что именно получил клиент по сроку, фасаду и итоговому виду объекта.
             </p>
           </div>
           <Link href="/portfolio/" className="text-sm font-semibold text-steel/80 hover:text-steel">
@@ -51,7 +51,7 @@ export const CasesSection = ({ title = "Наши работы", items }: Props) 
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
                 <span className="rounded bg-sky-100 px-2 py-1 text-steel">Срок: {item.term}</span>
-                <span className="rounded bg-orange-100 px-2 py-1 text-steel">Бюджет: {item.budget}</span>
+                {item.budget ? <span className="rounded bg-orange-100 px-2 py-1 text-steel">Бюджет: {item.budget}</span> : null}
               </div>
               <div className="mt-3 flex flex-wrap gap-2 text-xs text-steel/75">
                 {item.bestFor.slice(0, 3).map((tag) => (

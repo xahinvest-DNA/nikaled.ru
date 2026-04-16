@@ -120,7 +120,7 @@ export default async function PortfolioCasePage({ params }: PortfolioCasePagePro
           <aside className="card lg:sticky lg:top-24">
             <div className="flex flex-wrap gap-2 text-xs font-semibold">
               <span className="rounded bg-sky-100 px-2 py-1 text-steel">Срок: {item.term}</span>
-              <span className="rounded bg-orange-100 px-2 py-1 text-steel">Бюджет: {item.budget}</span>
+              {item.budget ? <span className="rounded bg-orange-100 px-2 py-1 text-steel">Бюджет: {item.budget}</span> : null}
             </div>
             <h2 className="mt-5 text-lg font-bold text-steel">Связанные услуги</h2>
             <div className="mt-3 flex flex-col gap-2">

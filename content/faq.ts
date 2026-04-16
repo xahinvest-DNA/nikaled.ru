@@ -1,4 +1,4 @@
-export type FaqItem = {
+﻿export type FaqItem = {
   id: string;
   question: string;
   answer: string;
@@ -35,6 +35,12 @@ export const faqItems: FaqItem[] = [
     serviceSpecific: ["soglasovanie-vyvesok"]
   },
   {
+    id: "facade-volume",
+    question: "Берётесь ли вы за отделку фасадов небольших зданий?",
+    answer: "Да. Работаем с офисами, частными домами, входными группами и небольшими объектами до 1000 м² без тяжёлых крупных строительных объёмов.",
+    serviceSpecific: ["otdelka-fasadov"]
+  },
+  {
     id: "design",
     question: "Можно ли сделать дизайн с нуля?",
     answer: "Да. Подготовим макет и предложим 2-3 варианта оформления под ваш объект."
@@ -45,4 +51,3 @@ export const faqItems: FaqItem[] = [
     answer: "Да. Есть опыт оформления магазинов, салонов, офисов и торговых помещений."
   }
 ];
-

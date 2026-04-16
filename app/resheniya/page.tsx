@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 import { Header } from "@/components/layout/Header";
 import { StructuredData } from "@/components/seo/StructuredData";
@@ -7,8 +7,8 @@ import { buildPageMetadata } from "@/lib/seo";
 import { buildBreadcrumbSchema } from "@/lib/structured-data";
 
 export const metadata = buildPageMetadata(
-  "Готовые решения по вывескам и наружной рекламе в Воронеже",
-  "Подбор решений по вывескам в Воронеже для магазинов, салонов красоты и других бизнесов.",
+  "Готовые решения по вывескам и фасадам в Воронеже",
+  "Подбор решений по вывескам, фасадам и наружной рекламе в Воронеже для магазинов, салонов, офисов и небольших зданий.",
   "/resheniya/"
 );
 
@@ -20,8 +20,9 @@ export default function SolutionsIndexPage() {
       <main className="container-narrow section-space pb-24 md:pb-16">
         <h1 className="text-3xl font-black text-ink md:text-5xl">Готовые решения</h1>
         <p className="mt-4 max-w-3xl text-sm leading-6 text-steel/80">
-          В этом разделе собраны готовые варианты под разные задачи бизнеса. Если вы открываете магазин, салон, кафе или хотите
-          быстро обновить фасад, здесь проще понять, с какого решения начать и что подойдет именно вашему объекту.
+          В этом разделе собраны готовые варианты под разные задачи бизнеса. Если вы открываете магазин, салон, кафе, хотите
+          быстро обновить фасад или собрать более цельный внешний вид объекта, здесь проще понять, с какого решения начать и
+          что подойдет именно вашему объекту.
         </p>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {solutionPages.map((page) => (

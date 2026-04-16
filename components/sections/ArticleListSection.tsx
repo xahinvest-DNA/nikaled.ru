@@ -2,6 +2,8 @@
 
 import { articles } from "@/content/articles";
 
+const featuredArticles = [...articles].reverse().slice(0, 6);
+
 export const ArticleListSection = () => {
   return (
     <section className="section-space bg-white">
@@ -19,7 +21,7 @@ export const ArticleListSection = () => {
           </Link>
         </div>
         <div className="mt-6 grid gap-4 xl:grid-cols-3">
-          {articles.slice(0, 6).map((article) => (
+          {featuredArticles.map((article) => (
             <article key={article.slug} className="card">
               <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-steel/60">
                 <span>{article.category}</span>

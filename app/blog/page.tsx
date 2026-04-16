@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 import { Header } from "@/components/layout/Header";
 import { StructuredData } from "@/components/seo/StructuredData";
@@ -8,13 +8,15 @@ import { buildBreadcrumbSchema } from "@/lib/structured-data";
 
 const categoryIntro = [
   "Выбор решения: какие форматы лучше подходят под разные фасады и задачи бизнеса.",
-  "Цена и бюджет: как считать смету и от чего реально зависит стоимость вывески.",
-  "Согласование: как учитывать документы и ограничения до запуска производства."
+  "Цена и бюджет: как считать смету и от чего реально зависит стоимость вывески или фасадных работ.",
+  "Согласование и фасад: как учитывать документы, внешний вид объекта и ограничения до запуска производства."
 ];
 
+const orderedArticles = [...articles].reverse();
+
 export const metadata = buildPageMetadata(
-  "Полезные материалы по вывескам и наружной рекламе в Воронеже",
-  "Статьи о вывесках, наружной рекламе, согласовании и расчете бюджета в Воронеже.",
+  "Полезные материалы по вывескам, фасадам и наружной рекламе в Воронеже",
+  "Статьи о вывесках, наружной рекламе, фасадах, согласовании и расчете бюджета в Воронеже.",
   "/blog/"
 );
 
@@ -27,7 +29,8 @@ export default function BlogIndexPage() {
         <h1 className="text-3xl font-black text-ink md:text-5xl">Полезные материалы</h1>
         <p className="mt-4 max-w-3xl text-sm leading-6 text-steel/80">
           Здесь собраны материалы, которые помогают быстрее разобраться в теме до звонка или заявки. Объясняем простым языком,
-          какую вывеску выбрать, от чего зависит цена, когда важно согласование и на что смотреть до запуска работ.
+          какую вывеску выбрать, от чего зависит цена, когда важно согласование, в каких случаях одной вывески уже мало и на что
+          смотреть до запуска работ по фасаду и наружной рекламе.
         </p>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {categoryIntro.map((item) => (
@@ -37,7 +40,7 @@ export default function BlogIndexPage() {
           ))}
         </div>
         <div className="mt-8 space-y-4">
-          {articles.map((article) => (
+          {orderedArticles.map((article) => (
             <article key={article.slug} className="card">
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>

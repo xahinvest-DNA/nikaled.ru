@@ -9,8 +9,8 @@ import { buildPageMetadata } from "@/lib/seo";
 import { buildBreadcrumbSchema } from "@/lib/structured-data";
 
 export const metadata = buildPageMetadata(
-  "Портфолио наружной рекламы в Воронеже",
-  "Примеры выполненных работ: вывески, объемные буквы, лайтбоксы и оформление входных групп.",
+  "Портфолио наружной рекламы и фасадных решений в Воронеже",
+  "Примеры выполненных работ: вывески, объемные буквы, лайтбоксы, фасадные решения и оформление входных групп.",
   "/portfolio/"
 );
 
@@ -22,8 +22,9 @@ export default function PortfolioPage() {
       <main className="container-narrow section-space pb-24 md:pb-16">
         <h1 className="text-3xl font-black text-ink md:text-5xl">Портфолио</h1>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-steel/80">
-          Реальные кейсы по наружной рекламе в Воронеже: от вывесок и объёмных букв до согласования и оформления входных групп.
-          Показываем не только картинку, но и задачу бизнеса, решение, срок, бюджет и что получил клиент в итоге.
+          Реальные кейсы по наружной рекламе и фасадным работам в Воронеже: от вывесок и объёмных букв до входных групп,
+          локальной отделки фасадов и брендирования объектов. Показываем не только картинку, но и задачу бизнеса, решение,
+          срок и что получил клиент в итоге.
         </p>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {cases.map((item) => (
@@ -50,7 +51,12 @@ export default function PortfolioPage() {
                 <span className="font-semibold text-steel">Что получил клиент:</span> {item.outcome}
               </p>
               <p className="mt-3 text-sm text-steel/80">
-                Срок: <strong>{item.term}</strong>, бюджет: <strong>{item.budget}</strong>
+                Срок: <strong>{item.term}</strong>
+                {item.budget ? (
+                  <>
+                    , бюджет: <strong>{item.budget}</strong>
+                  </>
+                ) : null}
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs text-steel/75">
                 {item.bestFor.slice(0, 3).map((tag) => (
