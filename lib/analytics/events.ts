@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 export type AnalyticsEvent = "submit_lead" | "click_call" | "click_telegram" | "open_calculator";
 
@@ -17,8 +17,7 @@ export const trackEvent = (eventName: AnalyticsEvent, params?: Record<string, un
   }
 
   const ymId = process.env.NEXT_PUBLIC_YM_ID ? Number(process.env.NEXT_PUBLIC_YM_ID) : null;
-  if (ymId && window.ym) {
+  if (ymId && typeof window.ym === "function") {
     window.ym(ymId, "reachGoal", eventName, params);
   }
 };
-
