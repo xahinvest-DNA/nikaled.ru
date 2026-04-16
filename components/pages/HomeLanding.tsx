@@ -1,6 +1,7 @@
 ﻿import { Header } from "@/components/layout/Header";
 import { ArticleListSection } from "@/components/sections/ArticleListSection";
 import { CasesSection } from "@/components/sections/CasesSection";
+import { FacadeEntrySection } from "@/components/sections/FacadeEntrySection";
 import { FaqSection } from "@/components/sections/FaqSection";
 import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
 import { Hero } from "@/components/sections/Hero";
@@ -24,6 +25,7 @@ export const HomeLanding = () => {
         <SelfIdentify />
         <QuickRequestSection />
         <ServicesGrid />
+        <FacadeEntrySection />
         <SolutionsEntrySection />
         <SeoContentSection />
         <CasesSection items={getCasesByService(undefined, 4)} />
