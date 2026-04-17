@@ -20,12 +20,16 @@ import { buildBreadcrumbSchema, buildFaqSchema, buildServiceSchema } from "@/lib
 const relatedArticleSlugs = [
   "kogda-nuzhna-ne-tolko-vyveska-no-i-otdelka-fasada",
   "chem-otdelat-fasad-nebolshogo-kommercheskogo-zdaniya",
-  "kogda-obnovlyat-vhodnuyu-gruppu-vmeste-s-vyveskoy"
+  "kogda-obnovlyat-vhodnuyu-gruppu-vmeste-s-vyveskoy",
+  "skolko-stoit-otdelka-fasada-nebolshogo-zdaniya-v-voronezhe",
+  "kak-oformit-fasad-magazina-chtoby-vyveska-rabotala-silnee"
 ];
 
 const relatedSolutionSlugs = [
   "otdelka-fasada-ofisa-i-nebolshogo-zdaniya-v-voronezhe",
-  "oformlenie-vhodnoy-gruppy-ofisa-i-medcentra-v-voronezhe"
+  "oformlenie-vhodnoy-gruppy-ofisa-i-medcentra-v-voronezhe",
+  "otdelka-fasada-chastnogo-doma-v-voronezhe",
+  "oformlenie-fasada-magazina-i-kommercheskogo-pomeshcheniya-v-voronezhe"
 ];
 
 export const FacadeLanding = ({ service }: { service: Service }) => {

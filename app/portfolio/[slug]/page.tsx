@@ -1,13 +1,15 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Header } from "@/components/layout/Header";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { SmartImage } from "@/components/ui/SmartImage";
+import { articles } from "@/content/articles";
 import { cases, casesMap } from "@/content/cases";
 import { media } from "@/content/media";
 import { services } from "@/content/services";
+import { solutionPages } from "@/content/solutions";
 import { buildBreadcrumbSchema } from "@/lib/structured-data";
 
 type PortfolioCasePageProps = {
@@ -44,7 +46,22 @@ export default async function PortfolioCasePage({ params }: PortfolioCasePagePro
   }
 
   const relatedServices = services.filter((service) => item.services.includes(service.slug));
-  const relatedCases = cases.filter((candidate) => candidate.id !== item.id).slice(0, 3);
+  const relatedCases = cases
+    .filter((candidate) => candidate.id !== item.id)
+    .map((candidate) => ({
+      candidate,
+      score: candidate.services.filter((serviceSlug) => item.services.includes(serviceSlug as (typeof services)[number]["slug"])).length
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((entry) => entry.candidate)
+    .slice(0, 3);
+  const relatedArticles = articles
+    .filter((article) => article.relatedServiceSlugs.some((serviceSlug) => item.services.includes(serviceSlug as (typeof services)[number]["slug"])))
+    .slice(0, 3);
+  const relatedSolutions = solutionPages
+    .filter((page) => page.relatedServiceSlugs.some((serviceSlug) => item.services.includes(serviceSlug as (typeof services)[number]["slug"])))
+    .slice(0, 3);
 
   return (
     <>
@@ -105,6 +122,32 @@ export default async function PortfolioCasePage({ params }: PortfolioCasePagePro
                 ))}
               </div>
             </section>
+            {relatedSolutions.length ? (
+              <section className="card">
+                <h2 className="text-xl font-bold text-steel">Подходящие решения по этой задаче</h2>
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                  {relatedSolutions.map((page) => (
+                    <Link key={page.slug} href={`/resheniya/${page.slug}/`} className="rounded-xl border border-steel/10 px-4 py-4 text-sm text-steel/80 transition hover:border-steel/20">
+                      <span className="block font-semibold text-steel">{page.title}</span>
+                      <span className="mt-2 block">{page.description}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+            {relatedArticles.length ? (
+              <section className="card">
+                <h2 className="text-xl font-bold text-steel">Полезно перед похожим проектом</h2>
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                  {relatedArticles.map((article) => (
+                    <Link key={article.slug} href={`/blog/${article.slug}/`} className="rounded-xl border border-steel/10 px-4 py-4 text-sm text-steel/80 transition hover:border-steel/20">
+                      <span className="block font-semibold text-steel">{article.title}</span>
+                      <span className="mt-2 block">{article.description}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
             <section className="card">
               <h2 className="text-xl font-bold text-steel">Другие кейсы</h2>
               <div className="mt-4 grid gap-3 md:grid-cols-3">

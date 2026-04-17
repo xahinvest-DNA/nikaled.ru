@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -9,7 +9,8 @@ import { CasesSection } from "@/components/sections/CasesSection";
 import { FaqSection } from "@/components/sections/FaqSection";
 import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
 import { StepsSection } from "@/components/sections/StepsSection";
-import { getCasesByService } from "@/content/cases";
+import { articles } from "@/content/articles";
+import { cases } from "@/content/cases";
 import { services } from "@/content/services";
 import { solutionPages, solutionPagesMap } from "@/content/solutions";
 import { buildBreadcrumbSchema, buildFaqSchema } from "@/lib/structured-data";
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: SolutionPageProps): Promise<M
     title: page.seoTitle,
     description: page.seoDescription,
     alternates: {
-      canonical: `/${page.slug}/`
+      canonical: `/resheniya/${page.slug}/`
     }
   };
 }
@@ -48,15 +49,30 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
   }
 
   const relatedServices = services.filter((service) => page.relatedServiceSlugs.includes(service.slug));
-  const caseItems = page.relatedServiceSlugs.flatMap((serviceSlug) => getCasesByService(serviceSlug as (typeof services)[number]["slug"], 2));
-  const uniqueCaseItems = caseItems.filter((item, index, array) => array.findIndex((candidate) => candidate.id === item.id) === index).slice(0, 4);
+  const uniqueCaseItems = cases
+    .filter((item) => item.services.some((serviceSlug) => page.relatedServiceSlugs.includes(serviceSlug as (typeof services)[number]["slug"])))
+    .slice(0, 4);
+  const relatedArticles = articles
+    .filter((article) => article.relatedServiceSlugs.some((serviceSlug) => page.relatedServiceSlugs.includes(serviceSlug as (typeof services)[number]["slug"])))
+    .slice(0, 3);
+  const relatedSolutions = solutionPages
+    .filter((candidate) => candidate.slug !== page.slug)
+    .map((candidate) => ({
+      candidate,
+      score: candidate.relatedServiceSlugs.filter((serviceSlug) => page.relatedServiceSlugs.includes(serviceSlug as (typeof services)[number]["slug"])).length
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((entry) => entry.candidate)
+    .slice(0, 3);
 
   return (
     <>
       <StructuredData
         data={buildBreadcrumbSchema([
           { name: "Главная", path: "" },
-          { name: page.title, path: `/${page.slug}/` }
+          { name: "Решения", path: "/resheniya/" },
+          { name: page.title, path: `/resheniya/${page.slug}/` }
         ])}
       />
       <StructuredData data={buildFaqSchema(page.faqItems)} />
@@ -115,6 +131,38 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
             </div>
           </div>
         </section>
+
+        {relatedSolutions.length ? (
+          <section className="section-space bg-paper/40">
+            <div className="container-narrow card">
+              <h2 className="text-2xl font-bold text-steel md:text-3xl">Похожие задачи и решения</h2>
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
+                {relatedSolutions.map((candidate) => (
+                  <Link key={candidate.slug} href={`/resheniya/${candidate.slug}/`} className="rounded-xl border border-steel/10 px-4 py-4 text-sm text-steel/80 transition hover:border-steel/20">
+                    <span className="block text-base font-bold text-steel">{candidate.title}</span>
+                    <span className="mt-2 block">{candidate.description}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {relatedArticles.length ? (
+          <section className="section-space bg-white">
+            <div className="container-narrow card">
+              <h2 className="text-2xl font-bold text-steel md:text-3xl">Что полезно прочитать перед стартом</h2>
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
+                {relatedArticles.map((article) => (
+                  <Link key={article.slug} href={`/blog/${article.slug}/`} className="rounded-xl border border-steel/10 px-4 py-4 text-sm text-steel/80 transition hover:border-steel/20">
+                    <span className="block text-base font-bold text-steel">{article.title}</span>
+                    <span className="mt-2 block">{article.description}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <CasesSection title="Релевантные кейсы" items={uniqueCaseItems} />
         <FaqSection items={page.faqItems} />

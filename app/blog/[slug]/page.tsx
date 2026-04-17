@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -6,7 +6,9 @@ import { Header } from "@/components/layout/Header";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { FaqSection } from "@/components/sections/FaqSection";
 import { articles, articlesMap } from "@/content/articles";
+import { cases } from "@/content/cases";
 import { services } from "@/content/services";
+import { solutionPages } from "@/content/solutions";
 import { buildBreadcrumbSchema, buildFaqSchema } from "@/lib/structured-data";
 
 type BlogArticlePageProps = {
@@ -44,7 +46,22 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
   }
 
   const relatedServices = services.filter((service) => article.relatedServiceSlugs.includes(service.slug));
-  const relatedArticles = articles.filter((item) => item.slug !== article.slug).slice(0, 3);
+  const relatedArticles = articles
+    .filter((item) => item.slug !== article.slug)
+    .map((item) => ({
+      item,
+      score: item.relatedServiceSlugs.filter((serviceSlug) => article.relatedServiceSlugs.includes(serviceSlug)).length
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((entry) => entry.item)
+    .slice(0, 3);
+  const relatedSolutions = solutionPages
+    .filter((page) => page.relatedServiceSlugs.some((serviceSlug) => article.relatedServiceSlugs.includes(serviceSlug)))
+    .slice(0, 3);
+  const relatedCases = cases
+    .filter((item) => item.services.some((serviceSlug) => article.relatedServiceSlugs.includes(serviceSlug)))
+    .slice(0, 3);
 
   return (
     <>
@@ -84,6 +101,32 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
                 </div>
               </section>
             ))}
+            {relatedSolutions.length ? (
+              <section className="card">
+                <h2 className="text-xl font-bold text-steel">Подходящие решения по теме</h2>
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                  {relatedSolutions.map((page) => (
+                    <Link key={page.slug} href={`/resheniya/${page.slug}/`} className="rounded-xl border border-steel/10 px-4 py-4 text-sm text-steel/80 transition hover:border-steel/20">
+                      <span className="block font-semibold text-steel">{page.title}</span>
+                      <span className="mt-2 block">{page.description}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+            {relatedCases.length ? (
+              <section className="card">
+                <h2 className="text-xl font-bold text-steel">Кейсы по этой теме</h2>
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                  {relatedCases.map((item) => (
+                    <Link key={item.id} href={`/portfolio/${item.id}/`} className="rounded-xl border border-steel/10 px-4 py-4 text-sm text-steel/80 transition hover:border-steel/20">
+                      <span className="block font-semibold text-steel">{item.title}</span>
+                      <span className="mt-2 block">{item.summary}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
             <section className="card">
               <h2 className="text-xl font-bold text-steel">Что посмотреть дальше</h2>
               <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
