@@ -1,8 +1,9 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 import { LeadForm } from "@/components/forms/LeadForm";
 import { Header } from "@/components/layout/Header";
 import { StructuredData } from "@/components/seo/StructuredData";
+import { FacadeConceptsSection } from "@/components/sections/FacadeConceptsSection";
 import { FacadeProjectsSection } from "@/components/sections/FacadeProjectsSection";
 import { FaqSection } from "@/components/sections/FaqSection";
 import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
@@ -57,6 +58,7 @@ export const FacadeLanding = ({ service }: { service: Service }) => {
         </section>
         <ServiceDetailsSection service={service} />
         <FacadeProjectsSection />
+        <FacadeConceptsSection />
         <section className="section-space bg-white">
           <div className="container-narrow grid gap-4 md:grid-cols-2">
             <article className="card">
