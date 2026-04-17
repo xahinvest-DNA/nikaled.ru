@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 
@@ -110,7 +110,7 @@ export const CalculatorModalHost = () => {
 
             {step === 0 ? (
               <select
-                className="w-full rounded-lg border border-steel/15 px-3 py-2"
+                className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-steel caret-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
                 value={data.service}
                 onChange={(e) => setData((prev) => ({ ...prev, service: e.target.value }))}
               >
@@ -123,7 +123,7 @@ export const CalculatorModalHost = () => {
 
             {step === 1 ? (
               <input
-                className="w-full rounded-lg border border-steel/15 px-3 py-2"
+                className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-steel caret-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
                 placeholder="Например: 3200 x 800 мм"
                 value={data.size}
                 onChange={(e) => setData((prev) => ({ ...prev, size: e.target.value }))}
@@ -133,13 +133,13 @@ export const CalculatorModalHost = () => {
             {step === 2 ? (
               <label className="block rounded-lg border border-dashed border-steel/25 p-4 text-sm text-steel/80">
                 Прикрепите фото объекта
-                <input type="file" className="mt-2 block w-full text-xs" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+                <input type="file" className="mt-2 block w-full text-xs text-steel file:mr-3 file:rounded-lg file:border-0 file:bg-paper file:px-3 file:py-2 file:text-steel" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
               </label>
             ) : null}
 
             {step === 3 ? (
               <input
-                className="w-full rounded-lg border border-steel/15 px-3 py-2"
+                className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-steel caret-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
                 placeholder="Монтаж/высота: например 2 этаж, через люльку"
                 value={data.mount}
                 onChange={(e) => setData((prev) => ({ ...prev, mount: e.target.value }))}
@@ -148,7 +148,7 @@ export const CalculatorModalHost = () => {
 
             {step === 4 ? (
               <input
-                className="w-full rounded-lg border border-steel/15 px-3 py-2"
+                className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-steel caret-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
                 placeholder="Желаемый срок"
                 value={data.deadline}
                 onChange={(e) => setData((prev) => ({ ...prev, deadline: e.target.value }))}
@@ -158,19 +158,19 @@ export const CalculatorModalHost = () => {
             {step === 5 ? (
               <div className="space-y-2">
                 <input
-                  className="w-full rounded-lg border border-steel/15 px-3 py-2"
+                  className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-steel caret-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
                   placeholder="Ваше имя (опционально)"
                   value={data.name}
                   onChange={(e) => setData((prev) => ({ ...prev, name: e.target.value }))}
                 />
                 <input
-                  className="w-full rounded-lg border border-steel/15 px-3 py-2"
+                  className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-steel caret-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
                   placeholder="+7 (___) ___-__-__"
                   value={data.phone}
                   onChange={(e) => setData((prev) => ({ ...prev, phone: formatPhoneRu(e.target.value) }))}
                 />
                 <textarea
-                  className="w-full rounded-lg border border-steel/15 px-3 py-2"
+                  className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-steel caret-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
                   rows={3}
                   placeholder="Коротко опишите задачу"
                   value={data.context}

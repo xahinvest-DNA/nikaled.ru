@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRef, useState } from "react";
 
@@ -136,7 +136,7 @@ export const LeadForm = ({
       <input
         type="text"
         placeholder="Ваше имя (опционально)"
-        className="w-full rounded-lg border border-steel/15 px-3 py-2 text-sm outline-none focus:border-steel/35"
+        className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-sm text-steel caret-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
         value={name}
         onFocus={trackStart}
         onChange={(e) => setName(e.target.value)}
@@ -145,7 +145,7 @@ export const LeadForm = ({
         type="tel"
         required
         placeholder="+7 (___) ___-__-__"
-        className="w-full rounded-lg border border-steel/15 px-3 py-2 text-sm outline-none focus:border-steel/35"
+        className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-sm text-steel caret-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
         value={phone}
         onFocus={trackStart}
         onChange={(e) => setPhone(formatPhoneRu(e.target.value))}
@@ -154,7 +154,7 @@ export const LeadForm = ({
         required
         rows={compact ? 3 : 4}
         placeholder="Опишите задачу: тип вывески, размеры, адрес, сроки"
-        className="w-full rounded-lg border border-steel/15 px-3 py-2 text-sm outline-none focus:border-steel/35"
+        className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-sm text-steel caret-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
         value={context}
         onFocus={trackStart}
         onChange={(e) => setContext(e.target.value)}
@@ -163,7 +163,7 @@ export const LeadForm = ({
         Фото/файл (опционально)
         <input
           type="file"
-          className="mt-1 block w-full text-xs"
+          className="mt-1 block w-full text-xs text-steel file:mr-3 file:rounded-lg file:border-0 file:bg-paper file:px-3 file:py-2 file:text-steel"
           onClick={trackStart}
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
