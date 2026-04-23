@@ -18,11 +18,11 @@ export const CasesSection = ({ title = "Наши работы", items }: Props) 
           <div>
             <h2 className="text-2xl font-bold text-steel md:text-3xl">{title}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-steel/80">
-              Показываем не только фото, но и что именно получил клиент по сроку, фасаду и итоговому виду объекта.
+              Показываем не только фото, но и что сделали, сколько это заняло и какой результат получил клиент.
             </p>
           </div>
           <Link href="/portfolio/" className="text-sm font-semibold text-steel/80 hover:text-steel">
-            Смотреть все кейсы
+            Смотреть все работы
           </Link>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -67,7 +67,7 @@ export const CasesSection = ({ title = "Наши работы", items }: Props) 
           ))}
         </div>
         <div className="mt-6">
-          <OpenCalcButton text="Получить расчёт сегодня" />
+          <OpenCalcButton text="Узнать цену" />
         </div>
       </div>
     </section>

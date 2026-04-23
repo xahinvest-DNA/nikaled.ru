@@ -8,11 +8,10 @@ export const SolutionsEntrySection = () => {
       <div className="container-narrow">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-steel md:text-3xl">Готовые решения под типовые задачи бизнеса</h2>
+            <h2 className="text-2xl font-bold text-steel md:text-3xl">Готовые решения для частых задач</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-steel/80">
-              Здесь собрали готовые варианты под частые задачи бизнеса. Если вы открываете магазин, салон, кафе, аптеку или
-              хотите не только вывеску, но и более собранный фасад, не нужно разбираться во всех форматах с нуля. Можно сразу
-              перейти в близкий вам раздел и посмотреть, какое решение обычно подходит в таких случаях.
+              Если открываете магазин, салон, кафе или хотите обновить фасад, здесь можно быстро посмотреть, что обычно делают в
+              таких случаях и какой вариант может подойти вам.
             </p>
           </div>
           <Link href="/resheniya/" className="btn-secondary">
@@ -30,7 +29,7 @@ export const SolutionsEntrySection = () => {
                 ))}
               </ul>
               <Link href={`/resheniya/${page.slug}/`} className="btn-secondary mt-5">
-                Открыть решение
+                Подробнее
               </Link>
             </article>
           ))}

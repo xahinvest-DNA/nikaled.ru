@@ -15,10 +15,11 @@ export const PricingSection = ({ service }: Props) => {
     <section className="section-space bg-white">
       <div className="container-narrow grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
         <div className="card">
-          <h2 className="text-2xl font-bold text-steel md:text-3xl">Сколько стоит</h2>
-          <p className="mt-3 text-sm text-steel/80">
-            Точная стоимость зависит от размеров, материалов, подсветки и сложности монтажа.
-          </p>
+        <h2 className="text-2xl font-bold text-steel md:text-3xl">Сколько это стоит</h2>
+        <p className="mt-3 text-sm text-steel/80">
+            Точную цену скажем после фото фасада или замера. Но уже сейчас можно понять, на какую сумму ориентироваться.
+        </p>
+          <p className="mt-5 text-sm font-semibold text-steel">Цена зависит от нескольких вещей:</p>
           <div className="mt-5 space-y-2">
             {rows.map((row) => (
               <div key={row.name} className="flex items-center justify-between rounded-lg border border-steel/10 px-3 py-2">
@@ -27,8 +28,17 @@ export const PricingSection = ({ service }: Props) => {
               </div>
             ))}
           </div>
+          <div className="mt-5 grid gap-2 sm:grid-cols-2">
+            {["Размер вывески", "Материалы", "Подсветка", "Сложность монтажа"].map(
+              (item) => (
+                <div key={item} className="rounded-lg border border-steel/10 bg-paper px-3 py-2 text-sm text-steel/80">
+                  {item}
+                </div>
+              )
+            )}
+          </div>
         </div>
-        <LeadForm title="Оставить заявку" buttonText="Получить расчёт сегодня" service={service} compact />
+        <LeadForm title="Получить расчёт по фото или размерам" buttonText="Узнать цену" service={service} compact />
       </div>
     </section>
   );

@@ -12,10 +12,10 @@ export const TrustSection = () => {
       <div className="container-narrow grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-4">
           <div className="card">
-            <h2 className="text-2xl font-bold text-steel md:text-3xl">Почему с нами проще запускать объект без хаоса и переделок</h2>
+            <h2 className="text-2xl font-bold text-steel md:text-3xl">Почему с нами проще</h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-steel/80">
-              Для бизнеса вывеска важна не сама по себе, а как часть открытия, трафика и нормального запуска. Поэтому мы строим работу так,
-              чтобы клиент заранее понимал сроки, бюджет и порядок действий, а не собирал это по кускам в процессе.
+              Когда заказывают вывеску, людям обычно нужно не просто красивое изделие. Важно понять цену, не ошибиться с размером,
+              уложиться в сроки и спокойно открыть точку без лишней суеты.
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {trustStats.map((item) => (
@@ -28,7 +28,7 @@ export const TrustSection = () => {
           </div>
 
           <div className="card">
-            <h3 className="text-xl font-bold text-steel">Что клиент получает на практике</h3>
+            <h3 className="text-xl font-bold text-steel">Что вы получаете</h3>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {trustProofs.map((item) => (
                 <article key={item.title} className="rounded-xl border border-steel/10 px-4 py-4">

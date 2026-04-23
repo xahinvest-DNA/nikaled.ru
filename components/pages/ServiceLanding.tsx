@@ -27,7 +27,7 @@ export const ServiceLanding = ({ service }: { service: Service }) => {
         <ServiceHero service={service} />
         <section className="section-space">
           <div className="container-narrow">
-            <LeadForm title="Быстрый расчёт по услуге" buttonText="Получить расчёт сегодня" service={service.name} compact />
+            <LeadForm title="Узнайте цену по вашей задаче" buttonText="Узнать цену" service={service.name} compact />
           </div>
         </section>
         <ServiceDetailsSection service={service} />
@@ -36,8 +36,8 @@ export const ServiceLanding = ({ service }: { service: Service }) => {
         <section className="section-space">
           <div className="container-narrow">
             <LeadForm
-              title="Пришлите размеры или фото объекта"
-              buttonText="Получить расчёт и понять бюджет"
+              title="Пришлите размеры или фото"
+              buttonText="Получить расчёт"
               service={service.name}
               compact
             />

@@ -23,8 +23,8 @@ export const HomeLanding = () => {
       <main className="pb-24 md:pb-0">
         <Hero />
         <SelfIdentify />
-        <QuickRequestSection />
         <ServicesGrid />
+        <QuickRequestSection />
         <FacadeEntrySection />
         <SolutionsEntrySection />
         <SeoContentSection />

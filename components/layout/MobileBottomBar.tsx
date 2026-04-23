@@ -15,7 +15,7 @@ export const MobileBottomBar = () => {
         >
           Позвонить
         </a>
-        <OpenCalcButton text="Получить расчёт" className="btn-primary flex-1" analyticsSource="mobile_bottom_bar" />
+        <OpenCalcButton text="Отправить фото" className="btn-primary flex-1" analyticsSource="mobile_bottom_bar" />
       </div>
     </div>
   );

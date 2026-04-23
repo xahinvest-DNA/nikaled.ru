@@ -176,7 +176,8 @@ export default async function PortfolioCasePage({ params }: PortfolioCasePagePro
             <div className="mt-5 border-t border-steel/10 pt-5">
               <h3 className="text-base font-bold text-steel">Нужен похожий проект?</h3>
               <p className="mt-3 text-sm text-steel/80">
-                Отправьте фото фасада или задачу, и мы предложим формат решения, срок и ориентир по бюджету.
+                Отправьте фото фасада или просто опишите задачу. Мы скажем, что можно сделать, сколько это займёт и на какую сумму
+                ориентироваться.
               </p>
               <div className="mt-4 flex flex-col gap-2">
                 <Link href="/kontakty/" className="btn-primary">

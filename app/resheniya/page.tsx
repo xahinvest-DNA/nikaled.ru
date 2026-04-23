@@ -20,9 +20,8 @@ export default function SolutionsIndexPage() {
       <main className="container-narrow section-space pb-24 md:pb-16">
         <h1 className="text-3xl font-black text-ink md:text-5xl">Готовые решения</h1>
         <p className="mt-4 max-w-3xl text-sm leading-6 text-steel/80">
-          В этом разделе собраны готовые варианты под разные задачи бизнеса. Если вы открываете магазин, салон, кафе, хотите
-          быстро обновить фасад или собрать более цельный внешний вид объекта, здесь проще понять, с какого решения начать и
-          что подойдет именно вашему объекту.
+          Здесь собрали варианты для частых задач: новая вывеска, обновление фасада, входная группа или подготовка к открытию.
+          Можно быстро посмотреть, с чего начать и что обычно делают в похожих случаях.
         </p>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {solutionPages.map((page) => (

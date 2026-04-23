@@ -7,11 +7,10 @@ export const FacadeProjectsSection = () => {
     <section className="section-space">
       <div className="container-narrow">
         <div className="max-w-4xl">
-          <h2 className="text-2xl font-bold text-steel md:text-3xl">Опыт и форматы работ по фасадам</h2>
+          <h2 className="text-2xl font-bold text-steel md:text-3xl">Наши работы по фасадам</h2>
           <p className="mt-3 text-sm leading-6 text-steel/80 md:text-base">
-            В этот блок мы не включаем рекламные вывески и смешанные рекламные кейсы. Здесь собраны отдельные фасадные объекты из
-            реального опыта и рабочие сценарии по отделке фасадов, входных групп и небольших зданий. Это честная часть нового
-            направления: показываем не обещания, а характер работ, с которыми уже есть практический опыт более 7 лет.
+            Здесь собраны примеры фасадных работ отдельно от вывесок. Показываем, что уже делали по входным группам, облицовке и
+            отделке фасадов, чтобы было понятнее, как это может выглядеть вживую.
           </p>
         </div>
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -44,7 +43,7 @@ export const FacadeProjectsSection = () => {
                 ))}
               </div>
               <div className="mt-4 rounded-xl border border-steel/10 bg-paper px-4 py-3 text-sm leading-6 text-steel/85">
-                <span className="font-semibold text-steel">Что это показывает:</span> {item.result}
+                <span className="font-semibold text-steel">Итог:</span> {item.result}
               </div>
             </article>
           ))}

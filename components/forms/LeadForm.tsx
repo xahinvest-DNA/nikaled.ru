@@ -51,7 +51,7 @@ export const LeadForm = ({
       return;
     }
     if (!context.trim()) {
-      setError("Опишите задачу, чтобы мы сделали точный расчет.");
+      setError("Напишите пару слов о задаче, чтобы мы могли посчитать стоимость.");
       return;
     }
 
@@ -106,7 +106,7 @@ export const LeadForm = ({
     return (
       <div className="card">
         <h3 className="text-xl font-bold text-steel">Спасибо, заявка отправлена</h3>
-        <p className="mt-2 text-sm text-steel/80">Ответим в течение 10 минут. Можете сразу выбрать удобный канал связи:</p>
+        <p className="mt-2 text-sm text-steel/80">Ответим в течение 10 минут. Если удобнее, можете сразу написать или позвонить:</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <a
             href={`tel:${contacts.phoneRaw}`}
@@ -153,7 +153,7 @@ export const LeadForm = ({
       <textarea
         required
         rows={compact ? 3 : 4}
-        placeholder="Опишите задачу: тип вывески, размеры, адрес, сроки"
+        placeholder="Например: нужна вывеска для магазина, ширина 3 метра, Воронеж, желательно к открытию"
         className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-sm text-steel caret-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
         value={context}
         onFocus={trackStart}
@@ -181,7 +181,7 @@ export const LeadForm = ({
       <button type="submit" className="btn-primary w-full" disabled={state === "loading"}>
         {state === "loading" ? "Отправляем..." : buttonText}
       </button>
-      <p className="text-xs text-steel/65">Пришлите размеры или фото объекта - посчитаем точнее.</p>
+      <p className="text-xs text-steel/65">Можно просто отправить фото фасада или размеры. Этого уже хватит для первого расчёта.</p>
     </form>
   );
 };

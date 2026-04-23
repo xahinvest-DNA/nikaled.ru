@@ -14,9 +14,9 @@ export const metadata = buildPageMetadata(
 
 const requestChecklist = [
   "Фото фасада или входной группы",
-  "Примерные размеры или хотя бы ориентир по ширине",
-  "Что хотите сделать: вывеска, буквы, лайтбокс, согласование",
-  "Когда нужен запуск: срочно, к открытию, без жесткого дедлайна"
+  "Примерный размер",
+  "Что именно нужно сделать",
+  "Когда хотите запуститься"
 ];
 
 export default function ContactsPage() {
@@ -28,8 +28,8 @@ export default function ContactsPage() {
         <section className="card">
           <h1 className="text-3xl font-black text-ink md:text-4xl">Контакты</h1>
           <p className="mt-4 text-sm leading-6 text-steel/80">
-            Если вам нужен расчёт вывески, наружной рекламы или помощь с согласованием в Воронеже, напишите или позвоните. Чем
-            больше исходных данных вы отправите сразу, тем точнее и быстрее будет смета.
+            Если хотите узнать цену или обсудить задачу, просто напишите или позвоните. Чем больше деталей пришлёте сразу, тем
+            быстрее мы сможем ответить.
           </p>
           <p className="mt-4 text-sm text-steel/80">Город: {contacts.city}</p>
           <p className="mt-1 text-sm text-steel/80">Адрес: {contacts.address}</p>
@@ -49,7 +49,7 @@ export default function ContactsPage() {
             </ul>
           </div>
         </section>
-        <LeadForm title="Оставьте заявку" buttonText="Получить расчёт и понять бюджет" compact />
+        <LeadForm title="Оставьте заявку" buttonText="Получить расчёт" compact />
       </main>
     </>
   );

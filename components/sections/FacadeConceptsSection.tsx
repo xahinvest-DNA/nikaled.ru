@@ -7,14 +7,13 @@ export const FacadeConceptsSection = () => {
     <section className="section-space bg-white">
       <div className="container-narrow">
         <div className="max-w-4xl">
-          <h2 className="text-2xl font-bold text-steel md:text-3xl">Визуальные концепции будущих фасадных проектов</h2>
+          <h2 className="text-2xl font-bold text-steel md:text-3xl">Как может выглядеть фасад после обновления</h2>
           <p className="mt-3 text-sm leading-6 text-steel/80 md:text-base">
-            Ниже мы показываем не реализованные объекты, а честные визуальные сценарии того, как может выглядеть фасадный проект
-            после обновления. Эти концепции сделаны на базе реального опыта более 7 лет в отделке фасадов и помогают быстрее
-            обсудить стиль, масштаб и подход к объекту ещё до замера и расчёта.
+            Ниже не готовые объекты, а примеры того, как может выглядеть фасад после обновления. Они помогают заранее обсудить
+            внешний вид, материалы и общее направление работ.
           </p>
           <div className="mt-4 inline-flex rounded-full border border-steel/15 bg-paper px-4 py-2 text-xs font-semibold uppercase tracking-wide text-steel/70">
-            AI-концепты. Не выдаём их за реализованные объекты.
+            Это визуальные примеры, а не готовые объекты.
           </div>
         </div>
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">

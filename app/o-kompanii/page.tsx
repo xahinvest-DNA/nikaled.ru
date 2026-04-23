@@ -17,9 +17,9 @@ const facts = [
 ];
 
 const process = [
-  "Проверяем задачу и фасад до запуска производства, чтобы не было ошибок по размерам и креплениям.",
-  "Подбираем формат конструкции под поток, расстояние обзора, бюджет и требования по размещению.",
-  "Собираем проект под ключ: от замера и дизайна до монтажа и передачи готового результата."
+  "Сначала смотрим задачу, фото и место установки, чтобы не ошибиться с размером и креплением.",
+  "Потом предлагаем вариант, который подойдёт по виду, цене и срокам.",
+  "После согласования делаем вывеску, монтируем и доводим всё до готового результата."
 ];
 
 export default function AboutPage() {
@@ -30,12 +30,12 @@ export default function AboutPage() {
         <h1 className="text-3xl font-black text-ink md:text-5xl">О компании</h1>
         <p className="mt-4 max-w-3xl text-sm leading-6 text-steel/80">
           Nikaled занимается наружной рекламой в Воронеже более 8 лет. Мы делаем вывески, объёмные буквы, лайтбоксы и оформление
-          входных групп для магазинов, салонов, кафе, офисов и других бизнесов. Для нас важно не просто изготовить конструкцию,
-          а помочь клиенту спокойно запуститься в срок, без переделок и лишних потерь времени.
+          входных групп для магазинов, салонов, кафе и офисов. Для нас важно не просто сделать вывеску, а помочь человеку спокойно
+          пройти весь путь от первой идеи до монтажа.
         </p>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           <article className="card">
-            <h2 className="text-xl font-bold text-steel">Почему с нами проще запускаться</h2>
+            <h2 className="text-xl font-bold text-steel">Почему с нами удобно работать</h2>
             <ul className="mt-3 space-y-2 text-sm text-steel/80">
               {facts.map((item) => (
                 <li key={item}>{item}</li>
@@ -47,7 +47,7 @@ export default function AboutPage() {
           </div>
         </div>
         <section className="mt-8 card">
-          <h2 className="text-xl font-bold text-steel">Как мы ведем проект</h2>
+          <h2 className="text-xl font-bold text-steel">Как всё проходит</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {process.map((item) => (
               <article key={item} className="rounded-xl border border-steel/10 bg-paper px-4 py-4 text-sm text-steel/80">

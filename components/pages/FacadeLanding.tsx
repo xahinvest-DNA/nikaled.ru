@@ -50,13 +50,12 @@ export const FacadeLanding = ({ service }: { service: Service }) => {
           <div className="container-narrow">
             <div className="rounded-2xl border border-steel/10 bg-paper p-6 text-sm leading-6 text-steel/85 md:text-base">
               <p>
-                Это отдельное направление Nikaled. На этой странице мы не смешиваем фасадные работы с рекламными вывесками и не
-                выдаём рекламные объекты за фасадные проекты. Показываем отдельный опыт по фасадам, входным группам и локальной
-                облицовке объектов, чтобы клиент видел формат работ честно и по делу.
+                Здесь собрали именно фасадные работы: входные группы, облицовку и обновление фасадов. Без вывесок вперемешку, чтобы
+                было проще понять, что мы можем сделать именно по фасаду.
               </p>
             </div>
             <div className="mt-6">
-              <LeadForm title="Быстрый расчёт по фасадным работам" buttonText="Получить расчёт сегодня" service={service.name} compact />
+              <LeadForm title="Узнайте цену по фасадным работам" buttonText="Узнать цену" service={service.name} compact />
             </div>
           </div>
         </section>
@@ -94,7 +93,7 @@ export const FacadeLanding = ({ service }: { service: Service }) => {
           <div className="container-narrow">
             <LeadForm
               title="Пришлите фото фасада или входной группы"
-              buttonText="Получить расчёт и понять бюджет"
+              buttonText="Получить расчёт"
               service={service.name}
               compact
             />
