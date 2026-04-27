@@ -1,11 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import { OpenCalcButton } from "@/components/ui/OpenCalcButton";
-import { SmartImage } from "@/components/ui/SmartImage";
 import { contacts } from "@/content/contacts";
-import { media } from "@/content/media";
 import { trackEvent } from "@/lib/analytics/events";
 
 const quickRoutes = [
@@ -36,6 +35,25 @@ const heroFacts = [
   { value: "от 10 000 ₽", label: "Примерная цена на старте" },
   { value: "7-14 дней", label: "Обычный срок изготовления" },
   { value: "24 месяца", label: "Гарантия на материалы и монтаж" }
+];
+
+const heroFrames = [
+  {
+    src: "/images/hero-video/frame-1-dusk-facade-nikaled-v2.png",
+    alt: "Вечерний фасад с подсвеченной вывеской"
+  },
+  {
+    src: "/images/hero-video/frame-2-closeup-nikaled-v3.png",
+    alt: "Объёмные буквы на тёмном фасаде"
+  },
+  {
+    src: "/images/hero-video/frame-3-workshop-clean-v3.png",
+    alt: "Изготовление световой вывески в мастерской"
+  },
+  {
+    src: "/images/hero-video/frame-4-interior-nikaled-v3.png",
+    alt: "Интерьер с фирменной световой вывеской Nikaled"
+  }
 ];
 
 export const Hero = () => {
@@ -90,16 +108,25 @@ export const Hero = () => {
         </div>
         <div className="rounded-[28px] border border-steel/10 bg-white p-4 shadow-card md:p-5">
           <div className="overflow-hidden rounded-2xl border border-steel/10 bg-[#020b1a]">
-            <div className="relative aspect-[16/10] w-full">
-              <SmartImage
-                src={media.hero}
-                fallbackSrc={media.caseFallback}
-                alt="Изображение Nikaled"
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover object-center"
-                priority
-              />
+            <div className="relative aspect-[16/10] w-full bg-[#040b16]">
+              {heroFrames.map((frame, index) => (
+                <div
+                  key={frame.src}
+                  className="hero-cinematic-frame motion-reduce:animate-none"
+                  style={{ animationDelay: `${index * 5}s` }}
+                >
+                  <Image
+                    src={frame.src}
+                    alt={frame.alt}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover object-center"
+                    priority={index === 0}
+                  />
+                </div>
+              ))}
+              <div className="hero-cinematic-overlay" />
+              <div className="hero-cinematic-scan motion-reduce:hidden" />
             </div>
           </div>
           <div className="mt-4 rounded-2xl bg-paper p-4">
