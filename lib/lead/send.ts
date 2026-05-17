@@ -191,6 +191,7 @@ const resolveLeadProvider = (): LeadProvider => {
 };
 
 export const sendLead = async (lead: LeadPayload, file?: File) => {
+  const config = getLeadConfig();
   const provider = resolveLeadProvider();
 
   try {
@@ -201,6 +202,18 @@ export const sendLead = async (lead: LeadPayload, file?: File) => {
 
     await sendLeadToTelegram(lead, file);
   } catch (error) {
+    if (provider === "telegram" && config.hasEmail) {
+      try {
+        console.warn("Telegram delivery failed. Trying email fallback.");
+        await sendLeadToEmail(lead, file);
+        return;
+      } catch (emailError) {
+        console.error("Email fallback also failed:", {
+          message: emailError instanceof Error ? emailError.message : String(emailError)
+        });
+      }
+    }
+
     const fallbackPath = await saveLeadFallback(lead, file, error);
 
     console.error("Lead delivery failed, saved to fallback storage:", {
