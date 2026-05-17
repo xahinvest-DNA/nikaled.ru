@@ -6,9 +6,29 @@ BRANCH="${BRANCH:-main}"
 PM2_APP="${PM2_APP:-nikaled}"
 HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:3000}"
 FORCE_INSTALL="${FORCE_INSTALL:-0}"
+HEALTH_RETRIES="${HEALTH_RETRIES:-10}"
+HEALTH_DELAY="${HEALTH_DELAY:-3}"
 
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+}
+
+health_check() {
+  local attempt=1
+
+  while (( attempt <= HEALTH_RETRIES )); do
+    if curl -fsS -I "$HEALTH_URL" >/dev/null; then
+      log "Health check passed on attempt $attempt/$HEALTH_RETRIES."
+      return 0
+    fi
+
+    log "Health check attempt $attempt/$HEALTH_RETRIES failed. Waiting ${HEALTH_DELAY}s..."
+    sleep "$HEALTH_DELAY"
+    ((attempt++))
+  done
+
+  log "Health check failed after $HEALTH_RETRIES attempts."
+  return 1
 }
 
 if [[ ! -d "$APP_DIR/.git" ]]; then
@@ -59,6 +79,12 @@ fi
 pm2 save >/dev/null
 
 log "Health check: $HEALTH_URL"
-curl -fsS -I "$HEALTH_URL" >/dev/null
+if ! health_check; then
+  log "PM2 status:"
+  pm2 status || true
+  log "Recent PM2 logs:"
+  pm2 logs "$PM2_APP" --lines 40 --nostream || true
+  exit 1
+fi
 
 log "Deploy completed successfully."
