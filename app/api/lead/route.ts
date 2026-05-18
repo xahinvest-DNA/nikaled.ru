@@ -39,7 +39,19 @@ export async function POST(request: Request) {
     await sendLead(payload, file);
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("Lead API error:", error);
+    console.error("Lead API error:", {
+      message: error instanceof Error ? error.message : String(error),
+      provider: process.env.LEAD_PROVIDER?.trim() || "auto",
+      hasTelegramToken: Boolean(process.env.TELEGRAM_BOT_TOKEN),
+      hasTelegramChatIds: Boolean((process.env.TELEGRAM_CHAT_IDS || process.env.TELEGRAM_CHAT_ID || "").trim()),
+      hasRelayUrl: Boolean(process.env.TELEGRAM_RELAY_URL),
+      hasRelayToken: Boolean(process.env.TELEGRAM_RELAY_TOKEN),
+      hasSmtpHost: Boolean(process.env.SMTP_HOST),
+      hasSmtpUser: Boolean(process.env.SMTP_USER),
+      hasSmtpPass: Boolean(process.env.SMTP_PASS),
+      hasSmtpFrom: Boolean(process.env.SMTP_FROM),
+      hasSmtpTo: Boolean(process.env.SMTP_TO)
+    });
     return bad("Internal error", 500);
   }
 }

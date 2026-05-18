@@ -1,7 +1,22 @@
 node_modules
 .next
+.netlify
+.codex-temp
+.vscode
+
 .env.local
 .env
+
 *.log
+debug.log
+dev.log
+
+dxdiag.txt
+Netlify token.txt
+=
+
+commercial-offers/
 Фото для сайта/
 Токен телега.txt
+Пароль SSH новый.txt
+Пароль от почтового сервиса.txt

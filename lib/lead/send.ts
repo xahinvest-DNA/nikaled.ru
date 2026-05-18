@@ -1,30 +1,15 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import { extname, join } from "node:path";
 import { randomUUID } from "node:crypto";
+import { extname, join } from "node:path";
+
 import nodemailer from "nodemailer";
 
+import { toLeadText } from "@/lib/lead/format";
 import type { LeadPayload } from "@/lib/lead/types";
 
 type LeadProvider = "telegram" | "email";
 
 const FALLBACK_DIR = join(process.cwd(), "var", "failed-leads");
-
-const toLeadText = (lead: LeadPayload) =>
-  [
-    "Новая заявка с сайта",
-    `Имя: ${lead.name || "-"}`,
-    `Телефон: ${lead.phone}`,
-    `Задача: ${lead.context}`,
-    `Услуга: ${lead.service || "-"}`,
-    `Страница: ${lead.page}`,
-    `Источник: ${lead.source}`,
-    `Referrer: ${lead.referrer || "-"}`,
-    `UTM source: ${lead.utm_source || "-"}`,
-    `UTM campaign: ${lead.utm_campaign || "-"}`,
-    `UTM term: ${lead.utm_term || "-"}`,
-    `UTM content: ${lead.utm_content || "-"}`,
-    `Время: ${lead.submittedAt}`
-  ].join("\n");
 
 export const sendLeadToTelegram = async (lead: LeadPayload, file?: File) => {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -44,7 +29,12 @@ export const sendLeadToTelegram = async (lead: LeadPayload, file?: File) => {
       form.append("chat_id", chatId);
       form.append("document", file, file.name);
       form.append("caption", "Файл к заявке");
-      const fileRes = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: "POST", body: form });
+
+      const fileRes = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, {
+        method: "POST",
+        body: form
+      });
+
       if (!fileRes.ok) {
         const details = await fileRes.text();
         throw new Error(`Telegram sendDocument failed for chat_id=${chatId}: ${details}`);
@@ -59,10 +49,49 @@ export const sendLeadToTelegram = async (lead: LeadPayload, file?: File) => {
         text: leadText
       })
     });
+
     if (!msgRes.ok) {
       const details = await msgRes.text();
       throw new Error(`Telegram sendMessage failed for chat_id=${chatId}: ${details}`);
     }
+  }
+};
+
+export const sendLeadToRelay = async (lead: LeadPayload, file?: File) => {
+  const relayUrl = process.env.TELEGRAM_RELAY_URL?.trim() || "";
+  const relayToken = process.env.TELEGRAM_RELAY_TOKEN?.trim() || "";
+
+  if (!relayUrl || !relayToken) throw new Error("Telegram relay env is not configured");
+
+  const relayPayload: {
+    lead: LeadPayload;
+    file?: {
+      name: string;
+      type: string;
+      contentBase64: string;
+    };
+  } = { lead };
+
+  if (file && file.size > 0) {
+    relayPayload.file = {
+      name: file.name || "attachment.bin",
+      type: file.type || "application/octet-stream",
+      contentBase64: Buffer.from(await file.arrayBuffer()).toString("base64")
+    };
+  }
+
+  const response = await fetch(relayUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-telegram-relay-token": relayToken
+    },
+    body: JSON.stringify(relayPayload)
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Telegram relay failed: ${details}`);
   }
 };
 
@@ -111,6 +140,9 @@ const getLeadConfig = () => {
     .map((id) => id.trim())
     .filter(Boolean);
 
+  const relayUrl = process.env.TELEGRAM_RELAY_URL?.trim() || "";
+  const relayToken = process.env.TELEGRAM_RELAY_TOKEN?.trim() || "";
+
   const smtp = {
     host: process.env.SMTP_HOST?.trim() || "",
     user: process.env.SMTP_USER?.trim() || "",
@@ -122,11 +154,14 @@ const getLeadConfig = () => {
   return {
     requestedProvider: (process.env.LEAD_PROVIDER?.trim().toLowerCase() || "auto") as LeadProvider | "auto",
     hasTelegram: Boolean(telegramToken) && telegramChatIds.length > 0,
+    hasRelay: Boolean(relayUrl && relayToken),
     hasEmail: Boolean(smtp.host && smtp.user && smtp.pass && smtp.from && smtp.to),
     debug: {
       requestedProvider: process.env.LEAD_PROVIDER?.trim() || "auto",
       hasTelegramToken: Boolean(telegramToken),
       telegramChatIdsCount: telegramChatIds.length,
+      hasRelayUrl: Boolean(relayUrl),
+      hasRelayToken: Boolean(relayToken),
       hasSmtpHost: Boolean(smtp.host),
       hasSmtpUser: Boolean(smtp.user),
       hasSmtpPass: Boolean(smtp.pass),
@@ -168,7 +203,7 @@ const resolveLeadProvider = (): LeadProvider => {
   const config = getLeadConfig();
 
   if (config.requestedProvider === "telegram") {
-    if (config.hasTelegram) return "telegram";
+    if (config.hasTelegram || config.hasRelay) return "telegram";
     if (config.hasEmail) {
       console.warn("LEAD_PROVIDER=telegram, but Telegram env is incomplete. Falling back to email.");
       return "email";
@@ -177,13 +212,13 @@ const resolveLeadProvider = (): LeadProvider => {
 
   if (config.requestedProvider === "email") {
     if (config.hasEmail) return "email";
-    if (config.hasTelegram) {
+    if (config.hasTelegram || config.hasRelay) {
       console.warn("LEAD_PROVIDER=email, but SMTP env is incomplete. Falling back to telegram.");
       return "telegram";
     }
   }
 
-  if (config.hasTelegram) return "telegram";
+  if (config.hasTelegram || config.hasRelay) return "telegram";
   if (config.hasEmail) return "email";
 
   const details = JSON.stringify(config.debug);
@@ -200,8 +235,30 @@ export const sendLead = async (lead: LeadPayload, file?: File) => {
       return;
     }
 
-    await sendLeadToTelegram(lead, file);
+    if (config.hasTelegram) {
+      await sendLeadToTelegram(lead, file);
+      return;
+    }
+
+    if (config.hasRelay) {
+      await sendLeadToRelay(lead, file);
+      return;
+    }
+
+    throw new Error("Telegram delivery was requested, but direct Telegram and relay are not configured");
   } catch (error) {
+    if (provider === "telegram" && config.hasTelegram && config.hasRelay) {
+      try {
+        console.warn("Telegram delivery failed. Trying Netlify relay fallback.");
+        await sendLeadToRelay(lead, file);
+        return;
+      } catch (relayError) {
+        console.error("Relay fallback also failed:", {
+          message: relayError instanceof Error ? relayError.message : String(relayError)
+        });
+      }
+    }
+
     if (provider === "telegram" && config.hasEmail) {
       try {
         console.warn("Telegram delivery failed. Trying email fallback.");
