@@ -104,7 +104,7 @@ export const buildExpertQuickReplies = (leadState: AiLeadState, currentMessage =
   }
 
   if (inquiryType === "calculation") {
-    return ["Световая вывеска", "Объёмные буквы", "Есть размеры", "Нужен монтаж"];
+    return ["Есть фото фасада", "Нужен монтаж", "Важно успеть к дате", "Нужен ориентир по цене"];
   }
 
   if (inquiryType === "selection") {
@@ -124,7 +124,7 @@ export const buildExpertQuickReplies = (leadState: AiLeadState, currentMessage =
   }
 
   if (stage === "situation") {
-    return ["Рассчитать вывеску", "Подобрать вариант", "Есть фото фасада", "Нужен монтаж"];
+    return ["Рассчитать вывеску", "Есть фото фасада", "Нужен монтаж", "Нужно к открытию"];
   }
 
   if (stage === "need_payoff") {

@@ -390,6 +390,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
 
       updateSessionState(nextMessages, nextLeadState, submittedAt);
       setShowContactForm(false);
+      setShowFallbackForm(false);
       setLeadSubmittedAt(submittedAt);
       setLeadSuccess("Заявка отправлена.");
       trackEvent("submit_lead", {
@@ -480,6 +481,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
 
       updateSessionState(nextMessages, nextLeadState, submittedAt);
       setLeadSubmittedAt(submittedAt);
+      setShowFallbackForm(false);
       setLeadSuccess("Заявка отправлена.");
       trackEvent("submit_lead", {
         source: "ai_assistant_fallback",
@@ -506,9 +508,9 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-x-3 bottom-[5.5rem] top-4 z-[60] md:inset-x-auto md:bottom-6 md:right-6 md:top-auto md:h-[640px] md:w-[400px]">
+    <div className="fixed inset-x-3 bottom-[5.5rem] top-4 z-[60] md:inset-x-auto md:bottom-6 md:right-6 md:top-4 md:w-[400px] md:max-w-[calc(100vw-3rem)]">
       <div className="flex h-full flex-col overflow-hidden rounded-[28px] border border-steel/10 bg-paper shadow-[0_24px_60px_rgba(16,25,34,0.22)]">
-        <div className="flex items-start justify-between gap-4 border-b border-steel/10 bg-white px-4 py-4">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-steel/10 bg-white/95 px-4 py-4 backdrop-blur">
           <div>
             <h2 className="text-base font-black text-steel">AI-помощник Nikaled</h2>
             <p className="mt-1 text-xs leading-5 text-steel/70">
@@ -516,11 +518,17 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button type="button" className="text-xs font-semibold text-steel/60" onClick={resetDialogState}>
+            <button type="button" className="hidden text-xs font-semibold text-steel/60 md:inline-flex" onClick={resetDialogState}>
               Очистить
             </button>
-            <button type="button" className="text-xs font-semibold text-steel/60" onClick={onClose}>
-              Закрыть
+            <button
+              type="button"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-steel/10 text-base font-semibold text-steel/70 transition hover:border-steel/25 hover:text-steel"
+              onClick={onClose}
+              aria-label="Закрыть помощника"
+              title="Закрыть"
+            >
+              ×
             </button>
           </div>
         </div>
@@ -601,6 +609,17 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
                 disabled={isSubmittingLead}
               >
                 {isSubmittingLead ? "Отправляем..." : "Отправить заявку"}
+              </button>
+            </div>
+          ) : null}
+
+          {leadSubmittedAt ? (
+            <div className="card mt-4 flex flex-wrap gap-2 border border-steel/10 p-4">
+              <button type="button" className="btn-primary" onClick={onClose}>
+                Закрыть помощника
+              </button>
+              <button type="button" className="btn-secondary" onClick={resetDialogState}>
+                Новая задача
               </button>
             </div>
           ) : null}

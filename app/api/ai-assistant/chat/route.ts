@@ -4,6 +4,7 @@ import {
   buildExpertQuickReplies,
   detectInquiryType
 } from "@/lib/ai-assistant/expert-flow";
+import { inferLeadStateFromText } from "@/lib/ai-assistant/intake";
 import {
   buildOpenAiRequestBody,
   extractCompletionContent,
@@ -55,8 +56,10 @@ const fallback = (message: string, leadState: AiLeadState, shouldAskContact = tr
   );
 
 const normalizeLeadState = (payload: AiAssistantRequest): AiLeadState => {
+  const inferredLeadState = inferLeadStateFromText(payload.message, payload.history);
   const normalizedState: AiLeadState = {
     ...payload.leadState,
+    ...inferredLeadState,
     page: payload.page || payload.leadState.page || "/",
     referrer: payload.referrer || payload.leadState.referrer || "",
     source: payload.leadState.source || payload.utm?.utm_source || "ai_assistant",
@@ -64,7 +67,8 @@ const normalizeLeadState = (payload: AiAssistantRequest): AiLeadState => {
     utm_campaign: payload.utm?.utm_campaign || payload.leadState.utm_campaign || "",
     utm_term: payload.utm?.utm_term || payload.leadState.utm_term || "",
     utm_content: payload.utm?.utm_content || payload.leadState.utm_content || "",
-    inquiryType: payload.leadState.inquiryType || detectInquiryType(payload.message, payload.leadState)
+    inquiryType:
+      payload.leadState.inquiryType || inferredLeadState.inquiryType || detectInquiryType(payload.message, payload.leadState)
   };
 
   return {
