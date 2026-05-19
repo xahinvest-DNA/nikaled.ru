@@ -25,6 +25,8 @@ const FALLBACK_REPLY =
 const AI_CHAT_MESSAGES_LIMIT = 20;
 const AI_CHAT_WINDOW_MS = 10 * 60 * 1000;
 const OPENAI_MODEL = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
+const OPENAI_DIRECT_TIMEOUT_MS = 8000;
+const OPENAI_RELAY_TIMEOUT_MS = 45000;
 
 const bad = (message: string, status = 400) =>
   NextResponse.json(
@@ -157,6 +159,8 @@ const shouldTryRelayAfterError = (error: unknown) => {
   return (
     /403/.test(message) ||
     /unsupported_country_region_territory/i.test(message) ||
+    /abort/i.test(message) ||
+    /timed out/i.test(message) ||
     /fetch failed/i.test(message) ||
     /network/i.test(message) ||
     /ECONNRESET/i.test(message) ||
@@ -169,6 +173,7 @@ const shouldTryRelayAfterError = (error: unknown) => {
 const requestOpenAiDirect = async (requestBody: OpenAiChatCompletionRequestBody, apiKey: string) => {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
+    signal: AbortSignal.timeout(OPENAI_DIRECT_TIMEOUT_MS),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`
@@ -194,6 +199,7 @@ const requestOpenAiRelay = async (requestBody: OpenAiChatCompletionRequestBody) 
 
   const response = await fetch(relayUrl, {
     method: "POST",
+    signal: AbortSignal.timeout(OPENAI_RELAY_TIMEOUT_MS),
     headers: {
       "Content-Type": "application/json",
       "x-openai-relay-token": relayToken
