@@ -65,6 +65,69 @@ const getWindowContext = () => {
 
 const createWelcomeMessage = () => createAiMessage("assistant", WELCOME_MESSAGE);
 
+const MAX_PHOTO_SIZE_MB = 3.5;
+const MAX_PHOTO_BYTES = MAX_PHOTO_SIZE_MB * 1024 * 1024;
+
+const loadImage = (src: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Image load failed"));
+    image.src = src;
+  });
+
+const canvasToBlob = (canvas: HTMLCanvasElement, quality: number) =>
+  new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+          return;
+        }
+
+        reject(new Error("Canvas export failed"));
+      },
+      "image/jpeg",
+      quality
+    );
+  });
+
+const compressImageFile = async (file: File) => {
+  if (file.size <= MAX_PHOTO_BYTES) {
+    return file;
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+
+  try {
+    const image = await loadImage(objectUrl);
+    const maxDimension = 1600;
+    const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+    const width = Math.max(1, Math.round(image.width * scale));
+    const height = Math.max(1, Math.round(image.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return file;
+    }
+
+    context.drawImage(image, 0, 0, width, height);
+
+    let blob = await canvasToBlob(canvas, 0.82);
+    if (blob.size > MAX_PHOTO_BYTES) {
+      blob = await canvasToBlob(canvas, 0.68);
+    }
+
+    const outputName = (file.name || "photo").replace(/\.[^.]+$/, "") + ".jpg";
+    return new File([blob], outputName, { type: "image/jpeg" });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+};
+
 export const AiAssistantPanel = ({ open, onClose }: Props) => {
   const [sessionId, setSessionId] = useState("");
   const [messages, setMessages] = useState<AiMessage[]>([]);
@@ -322,7 +385,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     await sendMessage(value);
   };
 
-  const handlePhotoSelect = (event: ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelect = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
 
     if (!file) {
@@ -336,18 +399,31 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setError("Фото должно быть не больше 10 МБ.");
+    if (file.size > 15 * 1024 * 1024) {
+      setError("Фото должно быть не больше 15 МБ.");
       event.target.value = "";
       return;
     }
 
-    setError("");
-    setAttachedPhoto(file);
-    setLeadState((current) => ({ ...current, hasPhoto: true }));
+    try {
+      setError("");
+      const preparedFile = await compressImageFile(file);
 
-    if (!hasStartedDialog && !inputValue.trim()) {
-      setInputValue("Прикрепил фото фасада");
+      if (preparedFile.size > MAX_PHOTO_BYTES) {
+        setError(`Фото всё ещё слишком большое. Нужен файл до ${MAX_PHOTO_SIZE_MB} МБ.`);
+        event.target.value = "";
+        return;
+      }
+
+      setAttachedPhoto(preparedFile);
+      setLeadState((current) => ({ ...current, hasPhoto: true }));
+
+      if (!hasStartedDialog && !inputValue.trim()) {
+        setInputValue("Прикрепил фото фасада");
+      }
+    } catch {
+      setError("Не удалось подготовить фото к отправке. Попробуйте другое изображение.");
+      event.target.value = "";
     }
   };
 
@@ -404,10 +480,21 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
         body: formData
       });
 
-      const data = (await response.json()) as AiAssistantLeadResponse;
+      const raw = await response.text();
+      let data: AiAssistantLeadResponse | null = null;
 
-      if (!response.ok || !data.ok) {
-        setError(data.message || "Не удалось отправить заявку.");
+      try {
+        data = JSON.parse(raw) as AiAssistantLeadResponse;
+      } catch {
+        data = null;
+      }
+
+      if (!response.ok || !data?.ok) {
+        if (response.status === 413) {
+          setError("Фото слишком большое для отправки. Попробуйте другое изображение или пришлите его в Telegram.");
+        } else {
+          setError(data?.message || "Не удалось отправить заявку.");
+        }
         trackEvent("ai_dialog_error", {
           page: nextLeadState.page || "/",
           source: "ai_assistant",
@@ -501,6 +588,10 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
       });
 
       if (!response.ok) {
+        if (response.status === 413) {
+          setError("Фото слишком большое для отправки. Попробуйте другое изображение или отправьте его в Telegram.");
+          return;
+        }
         throw new Error("Fallback lead request failed");
       }
 
@@ -555,6 +646,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
   const shouldShowStarterReplies =
     !hasStartedDialog && !showContactForm && !showFallbackForm && !leadSubmittedAt && quickReplies.length > 0;
   const shouldShowPhotoHelper = hasStartedDialog && !leadSubmittedAt && !attachedPhoto;
+  const shouldShowComposer = !showContactForm && !showFallbackForm && !leadSubmittedAt;
 
   if (!open) return null;
 
@@ -689,73 +781,77 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
         </div>
 
         <div className="border-t border-steel/10 bg-white px-4 py-4">
-          {shouldShowStarterReplies ? (
-            <div className="mb-3">
-              <AiAssistantQuickReplies items={quickReplies} disabled={isLoading} onSelect={handleQuickReply} />
-            </div>
-          ) : null}
           <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoSelect} />
-          {attachedPhoto ? (
-            <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-steel/10 bg-paper px-3 py-2">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-steel">Фото фасада прикреплено</p>
-                <p className="truncate text-xs text-steel/60">{attachedPhoto.name}</p>
+          {shouldShowComposer ? (
+            <>
+              {shouldShowStarterReplies ? (
+                <div className="mb-3">
+                  <AiAssistantQuickReplies items={quickReplies} disabled={isLoading} onSelect={handleQuickReply} />
+                </div>
+              ) : null}
+              {attachedPhoto ? (
+                <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-steel/10 bg-paper px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-steel">Фото фасада прикреплено</p>
+                    <p className="truncate text-xs text-steel/60">{attachedPhoto.name}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="shrink-0 text-xs font-semibold text-steel/65 hover:text-steel"
+                    onClick={removeAttachedPhoto}
+                  >
+                    Убрать
+                  </button>
+                </div>
+              ) : null}
+              <div className={shouldShowStarterReplies ? "mt-0 flex items-end gap-2" : "flex items-end gap-2"}>
+                <textarea
+                  rows={2}
+                  value={inputValue}
+                  onChange={(event) => setInputValue(event.target.value)}
+                  placeholder="Опишите задачу или задайте вопрос"
+                  className="min-h-[74px] flex-1 resize-none rounded-2xl border border-steel/15 bg-paper px-3 py-3 text-sm text-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
+                />
+                <button
+                  type="button"
+                  className="btn-secondary shrink-0 px-3 py-3"
+                  onClick={openPhotoPicker}
+                  disabled={isLoading}
+                  title="Прикрепить фото фасада"
+                >
+                  Фото
+                </button>
+                <button
+                  type="button"
+                  className="btn-primary shrink-0 px-4 py-3"
+                  onClick={() => void sendMessage(inputValue)}
+                  disabled={isLoading}
+                >
+                  Отправить
+                </button>
               </div>
-              <button
-                type="button"
-                className="shrink-0 text-xs font-semibold text-steel/65 hover:text-steel"
-                onClick={removeAttachedPhoto}
-              >
-                Убрать
-              </button>
-            </div>
-          ) : null}
-          <div className={shouldShowStarterReplies ? "mt-0 flex items-end gap-2" : "flex items-end gap-2"}>
-            <textarea
-              rows={2}
-              value={inputValue}
-              onChange={(event) => setInputValue(event.target.value)}
-              placeholder="Опишите задачу или задайте вопрос"
-              className="min-h-[74px] flex-1 resize-none rounded-2xl border border-steel/15 bg-paper px-3 py-3 text-sm text-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
-            />
-            <button
-              type="button"
-              className="btn-secondary shrink-0 px-3 py-3"
-              onClick={openPhotoPicker}
-              disabled={isLoading}
-              title="Прикрепить фото фасада"
-            >
-              Фото
-            </button>
-            <button
-              type="button"
-              className="btn-primary shrink-0 px-4 py-3"
-              onClick={() => void sendMessage(inputValue)}
-              disabled={isLoading}
-            >
-              Отправить
-            </button>
-          </div>
-          {shouldShowPhotoHelper ? (
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-steel/10 bg-paper px-3 py-2">
-              <p className="text-xs leading-5 text-steel/65">
-                Если удобнее, фото фасада можно не только прикрепить сюда, но и отправить в Telegram — так менеджер увидит его сразу.
-              </p>
-              <a
-                href={contacts.telegramUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-semibold text-brand hover:opacity-80"
-                onClick={() =>
-                  trackEvent("click_telegram", {
-                    page: leadState.page || "/",
-                    source: "ai_assistant_photo"
-                  })
-                }
-              >
-                Отправить фото в Telegram
-              </a>
-            </div>
+              {shouldShowPhotoHelper ? (
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-steel/10 bg-paper px-3 py-2">
+                  <p className="text-xs leading-5 text-steel/65">
+                    Если удобнее, фото фасада можно не только прикрепить сюда, но и отправить в Telegram — так менеджер увидит его сразу.
+                  </p>
+                  <a
+                    href={contacts.telegramUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-semibold text-brand hover:opacity-80"
+                    onClick={() =>
+                      trackEvent("click_telegram", {
+                        page: leadState.page || "/",
+                        source: "ai_assistant_photo"
+                      })
+                    }
+                  >
+                    Отправить фото в Telegram
+                  </a>
+                </div>
+              ) : null}
+            </>
           ) : null}
           {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
           {leadSuccess ? <p className="mt-3 text-xs text-emerald-700">{leadSuccess}</p> : null}
