@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Suspense } from "react";
 
 import { YandexMetrika } from "@/components/analytics/YandexMetrika";
+import { AiAssistantWidget } from "@/components/ai/AiAssistantWidget";
 import { CalculatorModalHost } from "@/components/forms/CalculatorModalHost";
 import { Footer } from "@/components/layout/Footer";
 import { MobileBottomBar } from "@/components/layout/MobileBottomBar";
@@ -70,6 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Suspense fallback={null}>
           <CalculatorModalHost />
         </Suspense>
+        <AiAssistantWidget />
         <MobileBottomBar />
         {gaId ? (
           <>

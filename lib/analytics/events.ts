@@ -7,7 +7,13 @@ export type AnalyticsEvent =
   | "submit_calculator"
   | "click_call"
   | "click_telegram"
-  | "open_calculator";
+  | "open_calculator"
+  | "open_ai_assistant"
+  | "start_ai_dialog"
+  | "ai_quick_reply_click"
+  | "ai_contact_requested"
+  | "ai_lead_submitted"
+  | "ai_dialog_error";
 
 declare global {
   interface Window {

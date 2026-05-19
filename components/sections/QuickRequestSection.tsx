@@ -1,6 +1,7 @@
 "use client";
 
 import { OpenCalcButton } from "@/components/ui/OpenCalcButton";
+import { OpenAiAssistantButton } from "@/components/ui/OpenAiAssistantButton";
 import { contacts } from "@/content/contacts";
 import { trackEvent } from "@/lib/analytics/events";
 
@@ -47,6 +48,7 @@ export const QuickRequestSection = () => {
             </ul>
             <div className="mt-5 flex flex-wrap gap-2">
               <OpenCalcButton text="Получить расчёт по фото" analyticsSource="quick_request" />
+              <OpenAiAssistantButton text="Подобрать вариант" analyticsSource="quick_request_ai" />
               <a
                 href={contacts.telegramUrl}
                 className="btn-secondary"

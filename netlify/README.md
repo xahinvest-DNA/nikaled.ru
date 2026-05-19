@@ -50,3 +50,49 @@ TELEGRAM_RELAY_TOKEN=<тот же секрет, что и в Netlify>
 - отправлять текстовые заявки
 - пересылать вложения через `sendDocument`
 - проверять секретный заголовок `x-telegram-relay-token`
+
+# Netlify OpenAI Relay
+
+Этот relay нужен на случай, когда серверный runtime сайта не может обратиться к OpenAI напрямую, хотя сам AI-помощник должен продолжать работать.
+
+## Переменные окружения в Netlify
+
+Задайте в панели Netlify:
+
+```text
+OPENAI_RELAY_TOKEN=<длинный случайный секрет>
+OPENAI_API_KEY=<рабочий ключ OpenAI>
+OPENAI_MODEL=gpt-4o-mini
+```
+
+## URL функции
+
+После деплоя функция будет доступна по адресу:
+
+```text
+https://<your-netlify-site>.netlify.app/.netlify/functions/openai-relay
+```
+
+## Что добавить на основном VPS
+
+В `.env.local` основного сайта нужно задать:
+
+```text
+OPENAI_RELAY_URL=https://<your-netlify-site>.netlify.app/.netlify/functions/openai-relay
+OPENAI_RELAY_TOKEN=<тот же секрет, что и в Netlify>
+```
+
+`OPENAI_API_KEY` на основном сервере можно оставить, если хотите сначала пробовать прямой вызов, а затем переключаться на relay. Если прямой доступ стабильно недоступен, AI-помощник сможет работать только через relay.
+
+## Как работает цепочка
+
+1. Сайт сначала пытается обратиться к OpenAI напрямую.
+2. Если сервер получает `403` с региональным ограничением или типовую сетевую ошибку, запрос уходит в Netlify relay.
+3. Relay выполняет вызов к OpenAI из окружения Netlify и возвращает сырой ответ обратно на сайт.
+4. Если relay тоже не сработал, AI-помощник показывает fallback-форму заявки.
+
+## Что relay умеет
+
+- принимать готовый `requestBody` для `chat/completions`
+- проверять секретный заголовок `x-openai-relay-token`
+- форвардить запрос в OpenAI с ключом, который хранится только в Netlify

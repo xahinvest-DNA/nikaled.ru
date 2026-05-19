@@ -1,6 +1,7 @@
 "use client";
 
 import { OpenCalcButton } from "@/components/ui/OpenCalcButton";
+import { OpenAiAssistantButton } from "@/components/ui/OpenAiAssistantButton";
 import { contacts } from "@/content/contacts";
 import { type Service } from "@/content/services";
 import { trackEvent } from "@/lib/analytics/events";
@@ -34,6 +35,10 @@ export const ServiceHero = ({ service }: Props) => {
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <OpenCalcButton text="Получить расчёт и понять бюджет" analyticsSource={`service_hero_${service.slug}`} />
+            <OpenAiAssistantButton
+              text="Помочь выбрать вариант"
+              analyticsSource={`service_hero_ai_${service.slug}`}
+            />
             <a
               href={`tel:${contacts.phoneRaw}`}
               className="btn-secondary"

@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { LeadForm } from "@/components/forms/LeadForm";
+import { OpenAiAssistantButton } from "@/components/ui/OpenAiAssistantButton";
 import { contacts } from "@/content/contacts";
 import { trackEvent } from "@/lib/analytics/events";
 
@@ -44,6 +45,13 @@ export const FinalCtaSection = ({ service }: Props) => {
           >
             Отправить фото в Telegram
           </a>
+          <div className="mt-3">
+            <OpenAiAssistantButton
+              text="Помочь выбрать вывеску"
+              className="btn-secondary"
+              analyticsSource="final_cta_ai"
+            />
+          </div>
         </div>
         <LeadForm title="Напишите, что нужно сделать" buttonText="Получить расчёт" service={service} compact />
       </div>
