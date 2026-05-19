@@ -1,6 +1,6 @@
 "use client";
 
-import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { trackEvent } from "@/lib/analytics/events";
 import {
@@ -19,7 +19,6 @@ import type {
   AiLeadState,
   AiMessage
 } from "@/lib/ai-assistant/types";
-import { contacts } from "@/content/contacts";
 import { formatPhoneRu, isValidRuPhone } from "@/lib/phone";
 
 import { AiAssistantMessage } from "@/components/ai/AiAssistantMessage";
@@ -33,7 +32,7 @@ type Props = {
 const INITIAL_QUICK_REPLIES = [
   "Рассчитать вывеску",
   "Подобрать вариант",
-  "Есть фото фасада",
+  "Нужен монтаж",
   "Нужно к открытию"
 ];
 
@@ -65,69 +64,6 @@ const getWindowContext = () => {
 
 const createWelcomeMessage = () => createAiMessage("assistant", WELCOME_MESSAGE);
 
-const MAX_PHOTO_SIZE_MB = 3.5;
-const MAX_PHOTO_BYTES = MAX_PHOTO_SIZE_MB * 1024 * 1024;
-
-const loadImage = (src: string) =>
-  new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Image load failed"));
-    image.src = src;
-  });
-
-const canvasToBlob = (canvas: HTMLCanvasElement, quality: number) =>
-  new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          resolve(blob);
-          return;
-        }
-
-        reject(new Error("Canvas export failed"));
-      },
-      "image/jpeg",
-      quality
-    );
-  });
-
-const compressImageFile = async (file: File) => {
-  if (file.size <= MAX_PHOTO_BYTES) {
-    return file;
-  }
-
-  const objectUrl = URL.createObjectURL(file);
-
-  try {
-    const image = await loadImage(objectUrl);
-    const maxDimension = 1600;
-    const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
-    const width = Math.max(1, Math.round(image.width * scale));
-    const height = Math.max(1, Math.round(image.height * scale));
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-
-    const context = canvas.getContext("2d");
-    if (!context) {
-      return file;
-    }
-
-    context.drawImage(image, 0, 0, width, height);
-
-    let blob = await canvasToBlob(canvas, 0.82);
-    if (blob.size > MAX_PHOTO_BYTES) {
-      blob = await canvasToBlob(canvas, 0.68);
-    }
-
-    const outputName = (file.name || "photo").replace(/\.[^.]+$/, "") + ".jpg";
-    return new File([blob], outputName, { type: "image/jpeg" });
-  } finally {
-    URL.revokeObjectURL(objectUrl);
-  }
-};
-
 export const AiAssistantPanel = ({ open, onClose }: Props) => {
   const [sessionId, setSessionId] = useState("");
   const [messages, setMessages] = useState<AiMessage[]>([]);
@@ -150,8 +86,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
   const [contactRequestedTracked, setContactRequestedTracked] = useState(false);
   const initializedRef = useRef(false);
   const messageEndRef = useRef<HTMLDivElement | null>(null);
-  const photoInputRef = useRef<HTMLInputElement | null>(null);
-  const [attachedPhoto, setAttachedPhoto] = useState<File | null>(null);
 
   const canSubmitLeadAgain = useMemo(() => {
     if (!leadSubmittedAt) return true;
@@ -217,10 +151,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     setLeadSuccess("");
     setHasStartedDialog(false);
     setContactRequestedTracked(false);
-    setAttachedPhoto(null);
-    if (photoInputRef.current) {
-      photoInputRef.current.value = "";
-    }
 
     saveAiSession({
       sessionId: nextSessionId,
@@ -281,14 +211,12 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
-    const preparedMessage = trimmed || (attachedPhoto ? "Прикрепил фото фасада" : "");
-    if (!preparedMessage || isLoading || !sessionId) return;
+    if (!trimmed || isLoading || !sessionId) return;
 
-    const userMessage = createAiMessage("user", preparedMessage);
+    const userMessage = createAiMessage("user", trimmed);
     const nextMessages = trimAiMessages([...messages, userMessage]);
     const nextLeadState = {
       ...leadState,
-      hasPhoto: attachedPhoto ? true : leadState.hasPhoto,
       page: getWindowContext().page,
       referrer: getWindowContext().referrer,
       source: leadState.source || getWindowContext().utm.utm_source || "ai_assistant",
@@ -318,7 +246,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
         },
         body: JSON.stringify({
           sessionId,
-          message: preparedMessage,
+          message: trimmed,
           history: nextMessages,
           leadState: nextLeadState,
           page: nextLeadState.page,
@@ -385,60 +313,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     await sendMessage(value);
   };
 
-  const handlePhotoSelect = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-
-    if (!file) {
-      setAttachedPhoto(null);
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      setError("Можно прикрепить только фото фасада.");
-      event.target.value = "";
-      return;
-    }
-
-    if (file.size > 15 * 1024 * 1024) {
-      setError("Фото должно быть не больше 15 МБ.");
-      event.target.value = "";
-      return;
-    }
-
-    try {
-      setError("");
-      const preparedFile = await compressImageFile(file);
-
-      if (preparedFile.size > MAX_PHOTO_BYTES) {
-        setError(`Фото всё ещё слишком большое. Нужен файл до ${MAX_PHOTO_SIZE_MB} МБ.`);
-        event.target.value = "";
-        return;
-      }
-
-      setAttachedPhoto(preparedFile);
-      setLeadState((current) => ({ ...current, hasPhoto: true }));
-
-      if (!hasStartedDialog && !inputValue.trim()) {
-        setInputValue("Прикрепил фото фасада");
-      }
-    } catch {
-      setError("Не удалось подготовить фото к отправке. Попробуйте другое изображение.");
-      event.target.value = "";
-    }
-  };
-
-  const openPhotoPicker = () => {
-    photoInputRef.current?.click();
-  };
-
-  const removeAttachedPhoto = () => {
-    setAttachedPhoto(null);
-
-    if (photoInputRef.current) {
-      photoInputRef.current.value = "";
-    }
-  };
-
   const submitLead = async () => {
     setError("");
     setLeadSuccess("");
@@ -471,9 +345,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
       formData.append("sessionId", sessionId);
       formData.append("history", JSON.stringify(messages));
       formData.append("leadState", JSON.stringify(nextLeadState));
-      if (attachedPhoto) {
-        formData.append("file", attachedPhoto, attachedPhoto.name);
-      }
 
       const response = await fetch("/api/ai-assistant/lead", {
         method: "POST",
@@ -491,7 +362,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
 
       if (!response.ok || !data?.ok) {
         if (response.status === 413) {
-          setError("Фото слишком большое для отправки. Попробуйте другое изображение или пришлите его в Telegram.");
+          setError("Не удалось отправить заявку. Попробуйте ещё раз или отправьте её без дополнительных материалов.");
         } else {
           setError(data?.message || "Не удалось отправить заявку.");
         }
@@ -515,10 +386,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
       setShowFallbackForm(false);
       setLeadSubmittedAt(submittedAt);
       setLeadSuccess("Заявка отправлена.");
-      setAttachedPhoto(null);
-      if (photoInputRef.current) {
-        photoInputRef.current.value = "";
-      }
       trackEvent("submit_lead", {
         source: "ai_assistant",
         service: nextLeadState.service || "unknown",
@@ -578,9 +445,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
       formData.append("utm_campaign", context.utm.utm_campaign || "");
       formData.append("utm_term", context.utm.utm_term || "");
       formData.append("utm_content", context.utm.utm_content || "");
-      if (attachedPhoto) {
-        formData.append("file", attachedPhoto, attachedPhoto.name);
-      }
 
       const response = await fetch("/api/lead", {
         method: "POST",
@@ -589,7 +453,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
 
       if (!response.ok) {
         if (response.status === 413) {
-          setError("Фото слишком большое для отправки. Попробуйте другое изображение или отправьте его в Telegram.");
+          setError("Не удалось отправить заявку. Попробуйте ещё раз или отправьте её без дополнительных материалов.");
           return;
         }
         throw new Error("Fallback lead request failed");
@@ -601,7 +465,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
         name: name.trim() || leadState.name || "",
         phone: fallbackPhone,
         summary: fallbackContext.trim(),
-        hasPhoto: attachedPhoto ? true : leadState.hasPhoto,
         page: context.page,
         referrer: context.referrer,
         source: context.utm.utm_source || "ai_assistant_fallback",
@@ -617,10 +480,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
       setLeadSubmittedAt(submittedAt);
       setShowFallbackForm(false);
       setLeadSuccess("Заявка отправлена.");
-      setAttachedPhoto(null);
-      if (photoInputRef.current) {
-        photoInputRef.current.value = "";
-      }
       trackEvent("submit_lead", {
         source: "ai_assistant_fallback",
         service: nextLeadState.service || "unknown",
@@ -645,7 +504,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
 
   const shouldShowStarterReplies =
     !hasStartedDialog && !showContactForm && !showFallbackForm && !leadSubmittedAt && quickReplies.length > 0;
-  const shouldShowPhotoHelper = hasStartedDialog && !leadSubmittedAt && !attachedPhoto;
   const shouldShowComposer = !showContactForm && !showFallbackForm && !leadSubmittedAt;
 
   if (!open) return null;
@@ -693,11 +551,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
           {showContactForm ? (
             <div className="card mt-4 space-y-3 border border-steel/10 p-4">
               <h3 className="text-sm font-bold text-steel">Оставьте телефон для расчёта</h3>
-              {attachedPhoto ? (
-                <p className="rounded-xl border border-steel/10 bg-paper px-3 py-2 text-xs text-steel/70">
-                  Фото фасада прикреплено и уйдёт вместе с заявкой.
-                </p>
-              ) : null}
               <input
                 type="text"
                 value={name}
@@ -736,11 +589,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
           {showFallbackForm ? (
             <div className="card mt-4 space-y-3 border border-steel/10 p-4">
               <h3 className="text-sm font-bold text-steel">Если удобнее, оставьте заявку сразу</h3>
-              {attachedPhoto ? (
-                <p className="rounded-xl border border-steel/10 bg-paper px-3 py-2 text-xs text-steel/70">
-                  Фото фасада прикреплено и будет отправлено вместе с заявкой.
-                </p>
-              ) : null}
               <input
                 type="tel"
                 value={fallbackPhone}
@@ -752,7 +600,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
                 rows={3}
                 value={fallbackContext}
                 onChange={(event) => setFallbackContext(event.target.value)}
-                placeholder="Например: нужна вывеска для новой точки, есть фото фасада"
+                placeholder="Например: нужна вывеска для новой точки, нужен монтаж к открытию"
                 className="w-full rounded-lg border border-steel/15 bg-white px-3 py-2 text-sm text-steel outline-none placeholder:text-steel/45 focus:border-steel/35"
               />
               <button
@@ -781,27 +629,11 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
         </div>
 
         <div className="border-t border-steel/10 bg-white px-4 py-4">
-          <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoSelect} />
           {shouldShowComposer ? (
             <>
               {shouldShowStarterReplies ? (
                 <div className="mb-3">
                   <AiAssistantQuickReplies items={quickReplies} disabled={isLoading} onSelect={handleQuickReply} />
-                </div>
-              ) : null}
-              {attachedPhoto ? (
-                <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-steel/10 bg-paper px-3 py-2">
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-steel">Фото фасада прикреплено</p>
-                    <p className="truncate text-xs text-steel/60">{attachedPhoto.name}</p>
-                  </div>
-                  <button
-                    type="button"
-                    className="shrink-0 text-xs font-semibold text-steel/65 hover:text-steel"
-                    onClick={removeAttachedPhoto}
-                  >
-                    Убрать
-                  </button>
                 </div>
               ) : null}
               <div className={shouldShowStarterReplies ? "mt-0 flex items-end gap-2" : "flex items-end gap-2"}>
@@ -814,15 +646,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
                 />
                 <button
                   type="button"
-                  className="btn-secondary shrink-0 px-3 py-3"
-                  onClick={openPhotoPicker}
-                  disabled={isLoading}
-                  title="Прикрепить фото фасада"
-                >
-                  Фото
-                </button>
-                <button
-                  type="button"
                   className="btn-primary shrink-0 px-4 py-3"
                   onClick={() => void sendMessage(inputValue)}
                   disabled={isLoading}
@@ -830,27 +653,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
                   Отправить
                 </button>
               </div>
-              {shouldShowPhotoHelper ? (
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-steel/10 bg-paper px-3 py-2">
-                  <p className="text-xs leading-5 text-steel/65">
-                    Если удобнее, фото фасада можно не только прикрепить сюда, но и отправить в Telegram — так менеджер увидит его сразу.
-                  </p>
-                  <a
-                    href={contacts.telegramUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs font-semibold text-brand hover:opacity-80"
-                    onClick={() =>
-                      trackEvent("click_telegram", {
-                        page: leadState.page || "/",
-                        source: "ai_assistant_photo"
-                      })
-                    }
-                  >
-                    Отправить фото в Telegram
-                  </a>
-                </div>
-              ) : null}
             </>
           ) : null}
           {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
