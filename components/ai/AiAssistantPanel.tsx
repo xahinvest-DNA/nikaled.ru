@@ -19,6 +19,7 @@ import type {
   AiLeadState,
   AiMessage
 } from "@/lib/ai-assistant/types";
+import { contacts } from "@/content/contacts";
 import { formatPhoneRu, isValidRuPhone } from "@/lib/phone";
 
 import { AiAssistantMessage } from "@/components/ai/AiAssistantMessage";
@@ -31,12 +32,9 @@ type Props = {
 
 const INITIAL_QUICK_REPLIES = [
   "Рассчитать вывеску",
-  "Подобрать тип вывески",
+  "Подобрать вариант",
   "Есть фото фасада",
-  "Нужен монтаж",
-  "Нужно к открытию",
-  "Нужно согласование",
-  "Задать вопрос"
+  "Нужно к открытию"
 ];
 
 const WELCOME_MESSAGE =
@@ -82,7 +80,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
   const [showFallbackForm, setShowFallbackForm] = useState(false);
-  const [showMobileQuickReplies, setShowMobileQuickReplies] = useState(true);
   const [leadSubmittedAt, setLeadSubmittedAt] = useState<string | undefined>(undefined);
   const [error, setError] = useState("");
   const [leadSuccess, setLeadSuccess] = useState("");
@@ -96,8 +93,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
 
     return Date.now() - new Date(leadSubmittedAt).getTime() >= AI_ASSISTANT_LEAD_COOLDOWN_MS;
   }, [leadSubmittedAt]);
-
-  const userMessagesCount = useMemo(() => messages.filter((item) => item.role === "user").length, [messages]);
 
   const persistSession = (
     nextMessages: AiMessage[],
@@ -152,7 +147,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     setIsSubmittingLead(false);
     setShowContactForm(false);
     setShowFallbackForm(false);
-    setShowMobileQuickReplies(true);
     setLeadSubmittedAt(undefined);
     setError("");
     setLeadSuccess("");
@@ -191,8 +185,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     setLeadSubmittedAt(stored.leadSubmittedAt);
     setContactComment(stored.leadState.summary || "");
     setHasStartedDialog(stored.messages.some((item) => item.role === "user"));
-    setShowMobileQuickReplies(!stored.messages.some((item) => item.role === "user"));
-
     saveAiSession({
       sessionId: stored.sessionId,
       messages: nextMessages,
@@ -217,12 +209,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     });
     setContactRequestedTracked(true);
   }, [contactRequestedTracked, leadState.page, leadState.service, showContactForm]);
-
-  useEffect(() => {
-    if (userMessagesCount > 0) {
-      setShowMobileQuickReplies(false);
-    }
-  }, [userMessagesCount]);
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
@@ -250,7 +236,6 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     setError("");
     setLeadSuccess("");
     setShowFallbackForm(false);
-    setShowMobileQuickReplies(false);
     updateSessionState(nextMessages, nextLeadState);
     setIsLoading(true);
 
@@ -283,7 +268,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
 
         setShowFallbackForm(true);
         setShowContactForm(Boolean(errorData.shouldAskContact));
-        setQuickReplies(errorData.quickReplies?.length ? errorData.quickReplies : INITIAL_QUICK_REPLIES);
+        setQuickReplies(errorData.quickReplies ?? []);
 
         if (errorData.fallbackReply) {
           const fallbackMessage = createAiMessage("assistant", errorData.fallbackReply);
@@ -303,7 +288,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
       const assistantMessage = createAiMessage("assistant", data.reply);
       const mergedMessages = trimAiMessages([...nextMessages, assistantMessage]);
 
-      setQuickReplies(data.quickReplies?.length ? data.quickReplies : INITIAL_QUICK_REPLIES);
+      setQuickReplies(data.quickReplies ?? []);
       setShowContactForm(Boolean(data.shouldAskContact) && !leadSubmittedAt);
       setContactComment(data.leadState.summary || contactComment);
       updateSessionState(mergedMessages, data.leadState);
@@ -505,6 +490,10 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     }
   };
 
+  const shouldShowStarterReplies =
+    !hasStartedDialog && !showContactForm && !showFallbackForm && !leadSubmittedAt && quickReplies.length > 0;
+  const shouldShowPhotoHelper = hasStartedDialog && !leadSubmittedAt;
+
   if (!open) return null;
 
   return (
@@ -628,20 +617,12 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
         </div>
 
         <div className="border-t border-steel/10 bg-white px-4 py-4">
-          <div className="mb-3 flex items-center justify-between md:hidden">
-            <button
-              type="button"
-              className="text-xs font-semibold text-steel/65"
-              onClick={() => setShowMobileQuickReplies((current) => !current)}
-            >
-              {showMobileQuickReplies ? "Скрыть подсказки" : "Подсказки"}
-            </button>
-            {userMessagesCount > 0 ? <span className="text-[11px] text-steel/45">Можно вести диалог и без кнопок</span> : null}
-          </div>
-          <div className={showMobileQuickReplies ? "block" : "hidden md:block"}>
-            <AiAssistantQuickReplies items={quickReplies} disabled={isLoading} onSelect={handleQuickReply} />
-          </div>
-          <div className="mt-3 flex items-end gap-2">
+          {shouldShowStarterReplies ? (
+            <div className="mb-3">
+              <AiAssistantQuickReplies items={quickReplies} disabled={isLoading} onSelect={handleQuickReply} />
+            </div>
+          ) : null}
+          <div className={shouldShowStarterReplies ? "mt-0 flex items-end gap-2" : "flex items-end gap-2"}>
             <textarea
               rows={2}
               value={inputValue}
@@ -658,6 +639,27 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
               Отправить
             </button>
           </div>
+          {shouldShowPhotoHelper ? (
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-steel/10 bg-paper px-3 py-2">
+              <p className="text-xs leading-5 text-steel/65">
+                Фото в чат пока не загружается. Если удобно, отправьте фасад в Telegram — так расчёт будет точнее.
+              </p>
+              <a
+                href={contacts.telegramUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-semibold text-brand hover:opacity-80"
+                onClick={() =>
+                  trackEvent("click_telegram", {
+                    page: leadState.page || "/",
+                    source: "ai_assistant_photo"
+                  })
+                }
+              >
+                Отправить фото в Telegram
+              </a>
+            </div>
+          ) : null}
           {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
           {leadSuccess ? <p className="mt-3 text-xs text-emerald-700">{leadSuccess}</p> : null}
         </div>

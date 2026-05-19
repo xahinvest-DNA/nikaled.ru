@@ -68,7 +68,9 @@ const normalizeLeadState = (payload: AiAssistantRequest): AiLeadState => {
     utm_term: payload.utm?.utm_term || payload.leadState.utm_term || "",
     utm_content: payload.utm?.utm_content || payload.leadState.utm_content || "",
     inquiryType:
-      payload.leadState.inquiryType || inferredLeadState.inquiryType || detectInquiryType(payload.message, payload.leadState)
+      payload.leadState.inquiryType ||
+      inferredLeadState.inquiryType ||
+      detectInquiryType(payload.message, payload.leadState, payload.history)
   };
 
   return {
@@ -97,7 +99,77 @@ const mergeLeadState = (current: AiLeadState, patch: LeadStatePatch): AiLeadStat
   };
 };
 
-const buildQuickReplies = (leadState: AiLeadState, currentMessage = "") => buildExpertQuickReplies(leadState, currentMessage);
+const APPROVAL_TOPIC_REGEX = /согласован|разрешени|документ/iu;
+const MOCKUP_BARRIER_REGEX =
+  /(как только .*макет|когда .*макет|нужн[оа] подготовить макет|рекомендую подготовить макет|как только у вас будет макет)/iu;
+
+const splitSentences = (value: string) =>
+  value
+    .split(/(?<=[.!?])\s+/u)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const shouldMentionApproval = (payload: AiAssistantRequest, leadState: AiLeadState) => {
+  const source = [
+    payload.message,
+    ...payload.history.filter((item) => item.role === "user").map((item) => item.content),
+    leadState.service || "",
+    leadState.summary || "",
+    leadState.page || ""
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    /согласован|разрешени|документ/i.test(source) ||
+    Boolean(leadState.needsApproval) ||
+    (leadState.service || "").toLowerCase().includes("согласование") ||
+    (leadState.page || "").toLowerCase().includes("соглас")
+  );
+};
+
+const isMockupMissingContext = (payload: AiAssistantRequest) => {
+  const source = [payload.message, ...payload.history.filter((item) => item.role === "user").map((item) => item.content)]
+    .join(" ")
+    .toLowerCase();
+
+  return /макет|дизайн|эскиз/i.test(source) && /(нет|не готов|не сделали|ничего из этого нет|пока нет)/i.test(source);
+};
+
+const sanitizeAssistantReply = (reply: string, payload: AiAssistantRequest, leadState: AiLeadState) => {
+  let nextReply = reply.trim();
+
+  if (!nextReply) {
+    return nextReply;
+  }
+
+  if (!shouldMentionApproval(payload, leadState)) {
+    nextReply = splitSentences(nextReply)
+      .filter((sentence) => !APPROVAL_TOPIC_REGEX.test(sentence))
+      .join(" ")
+      .trim();
+  }
+
+  if (!nextReply) {
+    nextReply = "Могу помочь с предварительным расчётом. Есть фото фасада или размеры?";
+  }
+
+  if (MOCKUP_BARRIER_REGEX.test(nextReply)) {
+    nextReply = nextReply.replace(
+      /(как только .*макет[^.!?]*[.!?]?|когда .*макет[^.!?]*[.!?]?|нужн[оа] подготовить макет[^.!?]*[.!?]?|рекомендую подготовить макет[^.!?]*[.!?]?)/giu,
+      "Если макета нет, это не проблема: можем подготовить его сами."
+    );
+  }
+
+  if (isMockupMissingContext(payload) && !/можем подготовить (его )?(сами|у нас)|подготовим (его )?(сами|у нас)/iu.test(nextReply)) {
+    nextReply = `Если макета нет, это не проблема: можем подготовить его сами. ${nextReply}`.trim();
+  }
+
+  return nextReply.replace(/\s{2,}/g, " ").trim();
+};
+
+const buildQuickReplies = (leadState: AiLeadState, currentMessage = "", history: AiAssistantRequest["history"] = []) =>
+  buildExpertQuickReplies(leadState, currentMessage, history);
 
 const buildHeuristicFlags = (leadState: AiLeadState, userMessagesCount: number) => {
   const qualificationSignals = [
@@ -300,11 +372,13 @@ export async function POST(request: Request) {
     const userMessagesCount = payload.history.filter((item) => item.role === "user").length;
     const heuristicFlags = buildHeuristicFlags(mergedLeadState, userMessagesCount);
 
+    const resolvedQuickReplies = buildQuickReplies(mergedLeadState, payload.message, payload.history);
+
     return NextResponse.json({
       ok: true,
-      reply: modelResult.reply.trim(),
+      reply: sanitizeAssistantReply(modelResult.reply, payload, mergedLeadState),
       leadState: mergedLeadState,
-      quickReplies: modelResult.quickReplies.length ? modelResult.quickReplies.slice(0, 4) : buildQuickReplies(mergedLeadState, payload.message),
+      quickReplies: resolvedQuickReplies,
       shouldAskContact: modelResult.shouldAskContact || heuristicFlags.shouldAskContact,
       shouldSubmitLead: modelResult.shouldSubmitLead || heuristicFlags.shouldSubmitLead
     } satisfies AiAssistantChatRouteResponse);

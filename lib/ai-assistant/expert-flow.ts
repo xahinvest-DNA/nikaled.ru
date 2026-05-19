@@ -1,135 +1,172 @@
 import { detectSpinStage } from "@/lib/ai-assistant/spin";
 import type { AiInquiryType, AiLeadState, AiMessage, AiSpinStage } from "@/lib/ai-assistant/types";
 
-const CALCULATION_MARKERS = ["рассчитать", "расчет", "стоимость", "цена", "сколько стоит", "посчитать"];
-const SELECTION_MARKERS = ["подобрать", "какой вариант", "что лучше", "что выбрать", "какую вывеску"];
-const TIMING_MARKERS = ["срок", "сроки", "когда", "успеете", "до ", "к открытию"];
-const APPROVAL_MARKERS = ["согласование", "согласовать", "документы", "разрешение"];
+const CALCULATION_MARKERS = ["рассчитать", "расчет", "расчёт", "стоимость", "цена", "сколько стоит", "посчитать"];
+const SELECTION_MARKERS = ["подобрать", "какой вариант", "что лучше", "что выбрать", "какую вывеску", "тип вывески"];
+const TIMING_MARKERS = ["срок", "сроки", "когда", "успеете", "до ", "к открытию", "срочно"];
+const APPROVAL_MARKERS = ["согласование", "согласовать", "документы", "разрешение", "паспорт фасада"];
 const PHOTO_MARKERS = ["фото", "фасад", "объект", "прикрепить", "прислать"];
+const MOCKUP_MARKERS = ["макет", "дизайн", "эскиз"];
 
 const includesAny = (source: string, markers: string[]) => markers.some((marker) => source.includes(marker));
 
-export const detectInquiryType = (message: string, leadState: AiLeadState): AiInquiryType => {
-  const source = `${message} ${leadState.summary || ""} ${leadState.service || ""}`.toLowerCase();
+const normalize = (value: string) => value.toLowerCase();
 
-  if (includesAny(source, APPROVAL_MARKERS) || leadState.needsApproval) return "approval";
-  if (includesAny(source, TIMING_MARKERS) || leadState.deadline) return "timing";
-  if (includesAny(source, PHOTO_MARKERS) || leadState.hasPhoto) return "photo";
-  if (includesAny(source, CALCULATION_MARKERS) || leadState.size || leadState.budget) return "calculation";
-  if (includesAny(source, SELECTION_MARKERS)) return "selection";
-  return "question";
+const getConversationSource = (message: string, leadState: AiLeadState, history: AiMessage[] = []) =>
+  normalize(
+    [
+      message,
+      leadState.summary || "",
+      leadState.service || "",
+      leadState.productType || "",
+      ...history.filter((item) => item.role === "user").map((item) => item.content)
+    ].join(" ")
+  );
+
+const isApprovalTriggered = (message: string, leadState: AiLeadState, history: AiMessage[] = []) => {
+  const source = getConversationSource(message, leadState, history);
+  const page = (leadState.page || "").toLowerCase();
+  const service = (leadState.service || "").toLowerCase();
+
+  return (
+    includesAny(source, APPROVAL_MARKERS) ||
+    Boolean(leadState.needsApproval) ||
+    service.includes("согласование") ||
+    page.includes("soglas") ||
+    page.includes("соглас")
+  );
+};
+
+const hasCommercialIntent = (leadState: AiLeadState, history: AiMessage[] = [], message = "") => {
+  const source = getConversationSource(message, leadState, history);
+  const userMessagesCount = history.filter((item) => item.role === "user").length;
+  const signals = [
+    Boolean(leadState.service || leadState.productType),
+    Boolean(leadState.size),
+    Boolean(leadState.deadline),
+    Boolean(leadState.mountingNeeded),
+    Boolean(leadState.hasPhoto),
+    Boolean(leadState.businessType || leadState.situation),
+    includesAny(source, CALCULATION_MARKERS),
+    includesAny(source, ["нужен расчет", "нужен расчёт", "посчитать", "просчитать", "к открытию"])
+  ].filter(Boolean).length;
+
+  return signals >= 2 || userMessagesCount >= 2;
 };
 
 const stageGoalMap: Record<AiSpinStage, string> = {
-  situation: "собрать базовые вводные по объекту и формату вывески",
-  problem: "понять ограничение проекта без психологических формулировок",
-  implication: "уточнить деловой риск: срок, согласование, фасад, монтаж, читаемость",
-  need_payoff: "зафиксировать, какой итоговый результат нужен клиенту по фасаду и запуску",
-  close: "подвести к расчёту и забрать контакт без лишних повторов"
+  situation: "собрать базовые вводные по объекту и конструкции",
+  problem: "понять одно практическое ограничение без психологических формулировок",
+  implication: "зафиксировать только деловой риск по сроку, монтажу или фасаду",
+  need_payoff: "понять, какой результат нужен по фасаду и запуску",
+  close: "подвести к расчёту, фото фасада или телефону без лишних кругов"
 };
 
 const scenarioQuestionMap: Record<AiInquiryType, Partial<Record<AiSpinStage, string>>> = {
   calculation: {
-    situation: "Уточни формат изделия, размеры, есть ли фото фасада и нужен ли монтаж.",
-    problem: "Уточни, что важнее для расчёта: заметность, аккуратный вид, срок или бюджет.",
-    implication: "Если срок уже назван, уточни только один деловой риск: к открытию, ограничения фасада или сложность монтажа.",
-    need_payoff: "Спроси, какой вариант нужен на выходе: заметный, аккуратный, более экономичный или премиальный.",
-    close: "Кратко собери вводные и попроси телефон для предварительного расчёта."
+    situation: "Уточни только то, чего не хватает для расчёта: формат, размер, фото фасада, монтаж или срок.",
+    problem: "Спроси один практический вопрос: что сейчас важнее для расчёта — заметность, аккуратный вид, срок или бюджет.",
+    implication: "Если срок уже назван, уточни только один риск: нужно успеть к открытию, есть ограничения по фасаду или сложный монтаж.",
+    need_payoff: "Спроси, какой результат важнее на выходе: заметнее, аккуратнее или быстрее запуститься.",
+    close: "Кратко собери вводные и веди к телефону или фото фасада."
   },
   selection: {
-    situation: "Помоги выбрать между световой вывеской, объёмными буквами и лайтбоксом под задачу клиента.",
-    problem: "Уточни, что ограничивает выбор: фасад, бюджет, читаемость, срок или требования по согласованию.",
-    implication: "Покажи деловое последствие неверного выбора: слишком просто, слишком дорого, нечитабельно или риск переделки.",
-    need_payoff: "Спроси, какой итог нужен: более заметно, солидно, компактно или без лишнего бюджета.",
-    close: "Предложи передать вводные на подбор 2-3 вариантов и попроси телефон."
+    situation: "Предложи 1 основной и 1 запасной вариант вывески под задачу клиента, затем задай один практический вопрос.",
+    problem: "Не спрашивай абстрактно, что ограничивает выбор. Лучше уточни: есть фото фасада, нужен монтаж или важен срок к открытию.",
+    implication: "Покажи риск только по делу: можно ошибиться с читаемостью, бюджетом или сроком, если не учесть фасад.",
+    need_payoff: "Уточни, что для клиента важнее: заметность, аккуратный фасад или более экономичный вариант.",
+    close: "Предложи перейти к предварительному расчёту по фото фасада или телефону."
   },
   timing: {
-    situation: "Уточни дату открытия или крайний срок, размер, фото фасада и нужен ли монтаж.",
-    problem: "Спроси только про то, что может помешать сроку: макет, фасад, согласование или электрика.",
-    implication: "Зафиксируй деловой риск срыва: открытие, запуск рекламы, монтаж в неудобное окно.",
-    need_payoff: "Уточни, что важнее при сроке: успеть к дате любой ценой, уложиться в бюджет или сохранить качество.",
-    close: "Если срок и базовые вводные есть, сразу веди к телефону для оперативного расчёта."
+    situation: "Уточни дату или дедлайн, а затем только один важный технический параметр: фото фасада, размер или монтаж.",
+    problem: "Не упоминай макет и согласование без запроса клиента. Лучше спроси, есть ли фото фасада и можно ли уже считать ориентир.",
+    implication: "Зафиксируй деловой риск срыва срока коротко и без нагнетания.",
+    need_payoff: "Уточни, что важнее при сроке: успеть к дате или сохранить определённый уровень исполнения.",
+    close: "Если срок и базовые вводные уже есть, сразу веди к телефону для оперативного расчёта."
   },
   approval: {
-    situation: "Уточни адрес/тип объекта, что именно хотят разместить и есть ли ограничения по фасаду.",
-    problem: "Спроси, в чём вопрос: документы заранее, уже получили замечание или боятся переделки.",
-    implication: "Зафиксируй риск демонтажа, отказа или лишних расходов на переделку.",
-    need_payoff: "Уточни, нужен ли спокойный запуск без возврата к документам и переделкам.",
+    situation: "Уточни адрес или тип объекта и суть вопроса по согласованию.",
+    problem: "Спроси, речь о документах заранее, замечании по объекту или риске переделки.",
+    implication: "Коротко обозначь риск демонтажа, отказа или лишних расходов на переделку.",
+    need_payoff: "Уточни, нужен ли запуск без возврата к документам и переделкам.",
     close: "После краткой диагностики попроси телефон для связи со специалистом по согласованию."
   },
   photo: {
-    situation: "Попроси описать фасад, если фото пока не отправлено, и объясни, что по фото расчёт будет точнее.",
-    problem: "Уточни, что именно нужно понять по фото: формат вывески, размер, крепление или внешний вид.",
-    implication: "Покажи, что без фото можно дать ориентир, а не точный вариант по фасаду.",
-    need_payoff: "Спроси, какой результат ждут от подбора по фото: заметность, аккуратность, экономия времени.",
-    close: "Предложи передать фото и телефон для более точного расчёта."
+    situation: "Объясни, что фото фасада ускоряет и уточняет расчёт. Если фото ещё не прислали, предложи Telegram компании.",
+    problem: "Уточни только одно: нужен подбор формата, оценка читаемости или ориентир по стоимости.",
+    implication: "Коротко скажи, что без фото можно дать ориентир, а с фото — точнее попасть в решение.",
+    need_payoff: "Спроси, что именно нужно получить по фото: 2-3 варианта, ориентир по цене или понять формат.",
+    close: "Предложи прислать фото в Telegram и оставить телефон для расчёта."
   },
   question: {
-    situation: "Сначала переведи общий вопрос в конкретную задачу по объекту или услуге.",
-    problem: "Не задавай вопросы про страхи. Уточни только деловое ограничение клиента.",
-    implication: "Если есть смысл, зафиксируй деловой риск короткой фразой.",
-    need_payoff: "Уточни желаемый результат одним предметным вопросом.",
+    situation: "Сначала переведи общий вопрос в конкретную задачу по объекту или вывеске.",
+    problem: "Не задавай лишние вопросы. Уточни только один следующий практический шаг.",
+    implication: "Если уместно, зафиксируй только один деловой риск короткой фразой.",
+    need_payoff: "Уточни ожидаемый результат одним предметным вопросом.",
     close: "Если контекст уже собран, проси телефон для расчёта или консультации."
   }
 };
 
+export const detectInquiryType = (message: string, leadState: AiLeadState, history: AiMessage[] = []): AiInquiryType => {
+  const source = getConversationSource(message, leadState, history);
+
+  if (isApprovalTriggered(message, leadState, history)) return "approval";
+  if (includesAny(source, SELECTION_MARKERS) && !includesAny(source, CALCULATION_MARKERS)) return "selection";
+  if (includesAny(source, CALCULATION_MARKERS) || leadState.size || leadState.budget || leadState.mountingNeeded !== undefined) {
+    return "calculation";
+  }
+  if (includesAny(source, PHOTO_MARKERS) || leadState.hasPhoto !== undefined) return "photo";
+  if (includesAny(source, TIMING_MARKERS) || leadState.deadline) return "timing";
+  return "question";
+};
+
 export const buildExpertGuidanceText = (message: string, leadState: AiLeadState, history: AiMessage[]) => {
-  const inquiryType = detectInquiryType(message, leadState);
+  const inquiryType = detectInquiryType(message, leadState, history);
   const stage = detectSpinStage(leadState);
   const userMessagesCount = history.filter((item) => item.role === "user").length;
+  const conversationSource = getConversationSource(message, leadState, history);
   const scenarioQuestion = scenarioQuestionMap[inquiryType][stage] || scenarioQuestionMap.question[stage] || "";
+  const approvalTriggered = isApprovalTriggered(message, leadState, history);
+  const commercialIntent = hasCommercialIntent(leadState, history, message);
+  const mentionsMockup = includesAny(conversationSource, MOCKUP_MARKERS);
 
   return [
     "Работай как менеджер-проектировщик Nikaled, а не как абстрактный AI-ассистент.",
     `Тип запроса: ${inquiryType}.`,
-    `Внутренний этап SPIN: ${stage}. Используй его скрыто, не называй этап клиенту.`,
+    `Внутренний этап SPIN: ${stage}. Используй его скрыто, не называй клиенту.`,
     `Цель текущего шага: ${stageGoalMap[stage]}.`,
     `Предметный следующий шаг: ${scenarioQuestion}`,
+    commercialIntent
+      ? "Клиент уже близок к расчёту. Не расширяй разговор лекцией: дай короткую рекомендацию и один следующий шаг."
+      : "Сначала дай предметную пользу, затем задай один уточняющий вопрос.",
+    "После выбора формата не возвращай клиента к общей теории. Переходи к фото фасада, монтажу, сроку или телефону.",
+    "Не задавай искусственные вопросы про опасения, страхи или абстрактные ограничения.",
+    approvalTriggered
+      ? "Контекст допускает разговор о согласовании, но всё равно держи его коротким и только по делу."
+      : "Не упоминай согласование первым и не открывай эту тему без прямого запроса клиента.",
+    mentionsMockup
+      ? "Если клиент говорит, что макета нет, отвечай: 'Это не проблема, макет можем подготовить сами.' Не отправляй клиента сначала делать макет."
+      : "Не поднимай тему макета без необходимости. Если макета нет, это не должно звучать как препятствие.",
+    "Если фото фасада ещё нет, объясни, что без фото можно дать ориентир, а с фото расчёт будет точнее.",
+    "Прямой загрузки фото в чат нет. Если нужен следующий шаг по фото, направляй клиента прислать фасад в Telegram компании или оставить телефон.",
     userMessagesCount <= 1
-      ? "Сделай первый ответ максимально предметным: предложи 2-3 профессиональных направления или один точный уточняющий вопрос."
-      : "В каждом сообщении добавляй практическую пользу: вариант решения, пояснение по фасаду, подсветке, монтажу или сроку.",
-    "Не задавай искусственные вопросы про страхи, опасения или 'всё ли в порядке с бюджетом'.",
-    "Если уже есть размер или срок, опирайся на них и задавай следующий технический вопрос по существу.",
-    "Без фото фасада допускается только ориентир. Объясняй это спокойно и профессионально.",
-    "Не используй фразы-пустышки: 'отличное решение', 'важно, чтобы', 'учтём в расчёте', если они не добавляют новой информации."
+      ? "Первый ответ сделай максимально предметным: 1 рекомендация или 2 близких варианта, без длинных объяснений."
+      : "Каждое следующее сообщение должно либо продвигать к расчёту, либо убирать одно реальное препятствие."
   ].join("\n");
 };
 
-export const buildExpertQuickReplies = (leadState: AiLeadState, currentMessage = "") => {
-  const inquiryType = detectInquiryType(currentMessage, leadState);
-  const stage = detectSpinStage(leadState);
+export const buildExpertQuickReplies = (leadState: AiLeadState, currentMessage = "", history: AiMessage[] = []) => {
+  const userMessagesCount = history.filter((item) => item.role === "user").length;
 
-  if (stage === "close") {
-    return ["Оставить телефон", "Есть фото фасада", "Нужен предварительный расчёт", "Нужна консультация"];
+  if (userMessagesCount > 0) {
+    return [];
   }
 
-  if (inquiryType === "calculation") {
-    return ["Есть фото фасада", "Нужен монтаж", "Важно успеть к дате", "Нужен ориентир по цене"];
-  }
+  const inquiryType = detectInquiryType(currentMessage, leadState, history);
 
   if (inquiryType === "selection") {
-    return ["Нужен заметный вариант", "Нужен аккуратный вид", "Важно уложиться в бюджет", "Есть фото фасада"];
+    return ["Подобрать вариант", "Световая вывеска", "Объёмные буквы", "Лайтбокс"];
   }
 
-  if (inquiryType === "timing") {
-    return ["Нужно к открытию", "Срок уже есть", "Монтаж нужен", "Фото пришлю"];
-  }
-
-  if (inquiryType === "approval") {
-    return ["Нужно согласование", "Есть ограничения фасада", "Нужны документы", "Хочу без переделок"];
-  }
-
-  if (inquiryType === "photo") {
-    return ["Фото уже есть", "Фото пришлю позже", "Нужен ориентир без фото", "Нужен монтаж"];
-  }
-
-  if (stage === "situation") {
-    return ["Рассчитать вывеску", "Есть фото фасада", "Нужен монтаж", "Нужно к открытию"];
-  }
-
-  if (stage === "need_payoff") {
-    return ["Нужна заметность", "Нужен аккуратный фасад", "Важно успеть в срок", "Нужен ориентир по цене"];
-  }
-
-  return ["Новая точка", "Меняем старую вывеску", "Есть размеры", "Нужен расчёт"];
+  return ["Рассчитать вывеску", "Подобрать вариант", "Есть фото фасада", "Нужно к открытию"];
 };
