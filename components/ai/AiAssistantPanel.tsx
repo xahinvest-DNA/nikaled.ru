@@ -31,15 +31,16 @@ type Props = {
 
 const INITIAL_QUICK_REPLIES = [
   "Рассчитать вывеску",
-  "Подобрать вариант",
-  "Узнать сроки",
-  "Нужно согласование",
+  "Подобрать тип вывески",
   "Есть фото фасада",
+  "Нужен монтаж",
+  "Нужно к открытию",
+  "Нужно согласование",
   "Задать вопрос"
 ];
 
 const WELCOME_MESSAGE =
-  "Помогу быстро понять, какая вывеска подойдёт, что нужно для расчёта и какие сроки возможны. Что вы хотите сделать?";
+  "Помогу понять, какой формат вывески подойдёт под ваш фасад, что влияет на стоимость и какие вводные нужны для расчёта. Что у вас за задача?";
 
 const getWindowContext = () => {
   if (typeof window === "undefined") {
@@ -81,6 +82,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
   const [showFallbackForm, setShowFallbackForm] = useState(false);
+  const [showMobileQuickReplies, setShowMobileQuickReplies] = useState(true);
   const [leadSubmittedAt, setLeadSubmittedAt] = useState<string | undefined>(undefined);
   const [error, setError] = useState("");
   const [leadSuccess, setLeadSuccess] = useState("");
@@ -94,6 +96,8 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
 
     return Date.now() - new Date(leadSubmittedAt).getTime() >= AI_ASSISTANT_LEAD_COOLDOWN_MS;
   }, [leadSubmittedAt]);
+
+  const userMessagesCount = useMemo(() => messages.filter((item) => item.role === "user").length, [messages]);
 
   const persistSession = (
     nextMessages: AiMessage[],
@@ -148,6 +152,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     setIsSubmittingLead(false);
     setShowContactForm(false);
     setShowFallbackForm(false);
+    setShowMobileQuickReplies(true);
     setLeadSubmittedAt(undefined);
     setError("");
     setLeadSuccess("");
@@ -186,6 +191,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     setLeadSubmittedAt(stored.leadSubmittedAt);
     setContactComment(stored.leadState.summary || "");
     setHasStartedDialog(stored.messages.some((item) => item.role === "user"));
+    setShowMobileQuickReplies(!stored.messages.some((item) => item.role === "user"));
 
     saveAiSession({
       sessionId: stored.sessionId,
@@ -211,6 +217,12 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     });
     setContactRequestedTracked(true);
   }, [contactRequestedTracked, leadState.page, leadState.service, showContactForm]);
+
+  useEffect(() => {
+    if (userMessagesCount > 0) {
+      setShowMobileQuickReplies(false);
+    }
+  }, [userMessagesCount]);
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
@@ -238,6 +250,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
     setError("");
     setLeadSuccess("");
     setShowFallbackForm(false);
+    setShowMobileQuickReplies(false);
     updateSessionState(nextMessages, nextLeadState);
     setIsLoading(true);
 
@@ -520,7 +533,7 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
             {isLoading ? (
               <div className="flex justify-start">
                 <div className="rounded-2xl border border-steel/10 bg-white px-4 py-3 text-sm text-steel/70">
-                  Печатаю ответ...
+                  Смотрю, какой вариант лучше предложить...
                 </div>
               </div>
             ) : null}
@@ -596,7 +609,19 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
         </div>
 
         <div className="border-t border-steel/10 bg-white px-4 py-4">
-          <AiAssistantQuickReplies items={quickReplies} disabled={isLoading} onSelect={handleQuickReply} />
+          <div className="mb-3 flex items-center justify-between md:hidden">
+            <button
+              type="button"
+              className="text-xs font-semibold text-steel/65"
+              onClick={() => setShowMobileQuickReplies((current) => !current)}
+            >
+              {showMobileQuickReplies ? "Скрыть подсказки" : "Подсказки"}
+            </button>
+            {userMessagesCount > 0 ? <span className="text-[11px] text-steel/45">Можно вести диалог и без кнопок</span> : null}
+          </div>
+          <div className={showMobileQuickReplies ? "block" : "hidden md:block"}>
+            <AiAssistantQuickReplies items={quickReplies} disabled={isLoading} onSelect={handleQuickReply} />
+          </div>
           <div className="mt-3 flex items-end gap-2">
             <textarea
               rows={2}

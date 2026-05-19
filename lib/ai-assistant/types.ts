@@ -3,6 +3,7 @@ export type AiRole = "user" | "assistant";
 export type AiQualification = "hot" | "warm" | "cold";
 export type AiProbability = "high" | "medium" | "low";
 export type AiSpinStage = "situation" | "problem" | "implication" | "need_payoff" | "close";
+export type AiInquiryType = "calculation" | "selection" | "timing" | "approval" | "photo" | "question";
 
 export type AiMessage = {
   id: string;
@@ -20,6 +21,11 @@ export type AiLeadState = {
   city?: string;
   size?: string;
   hasPhoto?: boolean;
+  inquiryType?: AiInquiryType;
+  productType?: string;
+  illumination?: string;
+  mountingNeeded?: boolean;
+  designPreference?: string;
   deadline?: string;
   budget?: string;
   goal?: string;

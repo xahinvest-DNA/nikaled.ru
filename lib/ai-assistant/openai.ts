@@ -1,7 +1,7 @@
 import { AI_ASSISTANT_KNOWLEDGE } from "@/lib/ai-assistant/knowledge";
-import { buildSpinGuidanceText } from "@/lib/ai-assistant/spin";
+import { buildExpertGuidanceText } from "@/lib/ai-assistant/expert-flow";
 import { AI_ASSISTANT_SYSTEM_PROMPT } from "@/lib/ai-assistant/system-prompt";
-import type { AiAssistantRequest, AiLeadState, AiSpinStage } from "@/lib/ai-assistant/types";
+import type { AiAssistantRequest, AiInquiryType, AiLeadState, AiSpinStage } from "@/lib/ai-assistant/types";
 
 export type LeadStatePatch = {
   name: string | null;
@@ -12,6 +12,11 @@ export type LeadStatePatch = {
   city: string | null;
   size: string | null;
   hasPhoto: boolean | null;
+  inquiryType: AiInquiryType | null;
+  productType: string | null;
+  illumination: string | null;
+  mountingNeeded: boolean | null;
+  designPreference: string | null;
   deadline: string | null;
   budget: string | null;
   goal: string | null;
@@ -74,6 +79,11 @@ export const OPENAI_RESPONSE_SCHEMA = {
           "city",
           "size",
           "hasPhoto",
+          "inquiryType",
+          "productType",
+          "illumination",
+          "mountingNeeded",
+          "designPreference",
           "deadline",
           "budget",
           "goal",
@@ -95,6 +105,14 @@ export const OPENAI_RESPONSE_SCHEMA = {
           city: { type: ["string", "null"] },
           size: { type: ["string", "null"] },
           hasPhoto: { type: ["boolean", "null"] },
+          inquiryType: {
+            type: ["string", "null"],
+            enum: ["calculation", "selection", "timing", "approval", "photo", "question", null]
+          },
+          productType: { type: ["string", "null"] },
+          illumination: { type: ["string", "null"] },
+          mountingNeeded: { type: ["boolean", "null"] },
+          designPreference: { type: ["string", "null"] },
           deadline: { type: ["string", "null"] },
           budget: { type: ["string", "null"] },
           goal: { type: ["string", "null"] },
@@ -140,7 +158,7 @@ export const buildOpenAiRequestBody = (
     },
     {
       role: "system",
-      content: buildSpinGuidanceText(leadState, payload.history)
+      content: buildExpertGuidanceText(payload.message, leadState, payload.history)
     },
     {
       role: "system",
@@ -161,6 +179,11 @@ export const buildOpenAiRequestBody = (
             city: null,
             size: null,
             hasPhoto: null,
+            inquiryType: null,
+            productType: null,
+            illumination: null,
+            mountingNeeded: null,
+            designPreference: null,
             deadline: null,
             budget: null,
             goal: null,

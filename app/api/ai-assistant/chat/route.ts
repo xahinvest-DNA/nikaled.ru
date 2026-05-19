@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
 import {
+  buildExpertQuickReplies,
+  detectInquiryType
+} from "@/lib/ai-assistant/expert-flow";
+import {
   buildOpenAiRequestBody,
   extractCompletionContent,
   extractJsonObjectText,
@@ -10,7 +14,7 @@ import {
   type OpenAiRelayRequestBody
 } from "@/lib/ai-assistant/openai";
 import { checkRateLimit } from "@/lib/ai-assistant/rate-limit";
-import { buildSpinQuickReplies, detectSpinStage } from "@/lib/ai-assistant/spin";
+import { detectSpinStage } from "@/lib/ai-assistant/spin";
 import type {
   AiAssistantChatRouteResponse,
   AiAssistantRequest,
@@ -59,7 +63,8 @@ const normalizeLeadState = (payload: AiAssistantRequest): AiLeadState => {
     utm_source: payload.utm?.utm_source || payload.leadState.utm_source || "",
     utm_campaign: payload.utm?.utm_campaign || payload.leadState.utm_campaign || "",
     utm_term: payload.utm?.utm_term || payload.leadState.utm_term || "",
-    utm_content: payload.utm?.utm_content || payload.leadState.utm_content || ""
+    utm_content: payload.utm?.utm_content || payload.leadState.utm_content || "",
+    inquiryType: payload.leadState.inquiryType || detectInquiryType(payload.message, payload.leadState)
   };
 
   return {
@@ -88,11 +93,12 @@ const mergeLeadState = (current: AiLeadState, patch: LeadStatePatch): AiLeadStat
   };
 };
 
-const buildQuickReplies = (leadState: AiLeadState) => buildSpinQuickReplies(leadState);
+const buildQuickReplies = (leadState: AiLeadState, currentMessage = "") => buildExpertQuickReplies(leadState, currentMessage);
 
 const buildHeuristicFlags = (leadState: AiLeadState, userMessagesCount: number) => {
   const qualificationSignals = [
     Boolean(leadState.service),
+    Boolean(leadState.productType || leadState.illumination || leadState.mountingNeeded === true),
     Boolean(leadState.goal || leadState.needPayoff),
     Boolean(leadState.pain || leadState.implication),
     Boolean(leadState.businessType || leadState.objectType || leadState.situation),
@@ -135,6 +141,11 @@ const parseModelPayload = (data: unknown) => {
       city: parsed.leadStatePatch?.city ?? null,
       size: parsed.leadStatePatch?.size ?? null,
       hasPhoto: parsed.leadStatePatch?.hasPhoto ?? null,
+      inquiryType: parsed.leadStatePatch?.inquiryType ?? null,
+      productType: parsed.leadStatePatch?.productType ?? null,
+      illumination: parsed.leadStatePatch?.illumination ?? null,
+      mountingNeeded: parsed.leadStatePatch?.mountingNeeded ?? null,
+      designPreference: parsed.leadStatePatch?.designPreference ?? null,
       deadline: parsed.leadStatePatch?.deadline ?? null,
       budget: parsed.leadStatePatch?.budget ?? null,
       goal: parsed.leadStatePatch?.goal ?? null,
@@ -289,7 +300,7 @@ export async function POST(request: Request) {
       ok: true,
       reply: modelResult.reply.trim(),
       leadState: mergedLeadState,
-      quickReplies: modelResult.quickReplies.length ? modelResult.quickReplies.slice(0, 4) : buildQuickReplies(mergedLeadState),
+      quickReplies: modelResult.quickReplies.length ? modelResult.quickReplies.slice(0, 4) : buildQuickReplies(mergedLeadState, payload.message),
       shouldAskContact: modelResult.shouldAskContact || heuristicFlags.shouldAskContact,
       shouldSubmitLead: modelResult.shouldSubmitLead || heuristicFlags.shouldSubmitLead
     } satisfies AiAssistantChatRouteResponse);
