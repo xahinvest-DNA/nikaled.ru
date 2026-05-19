@@ -1,4 +1,5 @@
 import { detectSpinStage } from "@/lib/ai-assistant/spin";
+import { buildCommunicationGuidance } from "@/lib/ai-assistant/dna-lite";
 import type { AiInquiryType, AiLeadState, AiMessage, AiSpinStage } from "@/lib/ai-assistant/types";
 
 const CALCULATION_MARKERS = ["рассчитать", "расчет", "расчёт", "стоимость", "цена", "сколько стоит", "посчитать"];
@@ -126,6 +127,7 @@ export const buildExpertGuidanceText = (message: string, leadState: AiLeadState,
   const approvalTriggered = isApprovalTriggered(message, leadState, history);
   const commercialIntent = hasCommercialIntent(leadState, history, message);
   const mentionsMockup = includesAny(conversationSource, MOCKUP_MARKERS);
+  const dnaGuidance = leadState.communicationProfile ? buildCommunicationGuidance(leadState.communicationProfile) : "";
 
   return [
     "Работай как менеджер-проектировщик Nikaled, а не как абстрактный AI-ассистент.",
@@ -145,6 +147,7 @@ export const buildExpertGuidanceText = (message: string, leadState: AiLeadState,
       ? "Если клиент говорит, что макета нет, отвечай: 'Это не проблема, макет можем подготовить сами.' Не отправляй клиента сначала делать макет."
       : "Не поднимай тему макета без необходимости. Если макета нет, это не должно звучать как препятствие.",
     "Не уводи разговор в фото фасада. Помощник должен вести к расчёту по базовым вводным и телефону.",
+    dnaGuidance ? `Скрытый коммуникационный профиль клиента:\n${dnaGuidance}` : "",
     userMessagesCount <= 1
       ? "Первый ответ сделай максимально предметным: 1 рекомендация или 2 близких варианта, без длинных объяснений."
       : "Каждое следующее сообщение должно либо продвигать к расчёту, либо убирать одно реальное препятствие."

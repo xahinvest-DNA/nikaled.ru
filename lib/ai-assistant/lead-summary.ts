@@ -1,9 +1,15 @@
 import type {
+  AiCommunicationProfile,
   AiLeadState,
   AiMessage,
   AiProbability,
   AiQualification
 } from "@/lib/ai-assistant/types";
+import {
+  buildCommunicationProfileSummary,
+  getCommunicationProfileLabels,
+  inferCommunicationProfile
+} from "@/lib/ai-assistant/dna-lite";
 
 const lastUserMessages = (history: AiMessage[], limit = 4) =>
   history.filter((item) => item.role === "user").slice(-limit);
@@ -45,19 +51,11 @@ export const qualifyAiLead = (leadState: AiLeadState): { qualification: AiQualif
 
 export const buildAiLeadRecommendation = (leadState: AiLeadState, qualification: AiQualification) => {
   if (qualification === "hot") {
-    if (leadState.hasPhoto) {
-      return "Позвонить, быстро уточнить формат конструкции и подготовить предварительный расчёт по фото фасада.";
-    }
-
-    return "Позвонить, запросить фото фасада, уточнить тип конструкции и дать предварительный расчёт.";
+    return "Позвонить, уточнить тип конструкции и быстро дать предварительный расчёт.";
   }
 
   if (qualification === "warm") {
-    if (!leadState.hasPhoto) {
-      return "Запросить фото фасада, тип конструкции и приоритет клиента, затем предложить 2-3 варианта и ориентир по стоимости.";
-    }
-
-    return "Уточнить сроки, формат вывески и приоритет клиента, затем предложить предварительный расчёт или замер.";
+    return "Уточнить сроки, формат вывески и приоритет клиента, затем предложить 2-3 варианта и ориентир по стоимости.";
   }
 
   return "Продолжить консультацию как эксперт: помочь выбрать формат конструкции и вернуться к контакту позже.";
@@ -79,7 +77,6 @@ export const buildAiLeadSummary = (leadState: AiLeadState) => {
     leadState.needPayoff ? `Ожидаемый результат: ${leadState.needPayoff}` : "",
     leadState.deadline ? `Срок: ${leadState.deadline}` : "",
     leadState.budget ? `Бюджет: ${leadState.budget}` : "",
-    leadState.hasPhoto === true ? "Фото фасада: есть или готов прислать" : "",
     leadState.size ? `Размеры: ${leadState.size}` : ""
   ].filter(Boolean);
 
@@ -88,6 +85,25 @@ export const buildAiLeadSummary = (leadState: AiLeadState) => {
   }
 
   return parts.join(". ");
+};
+
+const formatCommunicationProfile = (profile: AiCommunicationProfile) => {
+  const labels = getCommunicationProfileLabels(profile);
+
+  return [
+    "Communication DNA Lite:",
+    `Профиль: ${buildCommunicationProfileSummary(profile)}`,
+    `Горизонт мышления: ${labels.horizon}`,
+    `Ключевая ценность: ${labels.value}`,
+    `Скрытая потребность: ${labels.hiddenNeed}`,
+    `Уверенность профиля: ${labels.confidence}`,
+    `Как лучше говорить: ${profile.do.join("; ") || "-"}`,
+    `Чего избегать: ${profile.avoid.join("; ") || "-"}`,
+    `Триггеры доверия: ${profile.trustTriggers.join("; ") || "-"}`,
+    `Триггеры отторжения: ${profile.resistanceTriggers.join("; ") || "-"}`,
+    `Старт менеджера: ${profile.managerOpener}`,
+    `Стиль follow-up: ${profile.followUpStyle}`
+  ].join("\n");
 };
 
 export const formatAiDialogue = (history: AiMessage[]) =>
@@ -100,6 +116,7 @@ export const buildAiLeadContext = (leadState: AiLeadState, history: AiMessage[])
   const { qualification, probability } = qualifyAiLead(leadState);
   const recommendation = buildAiLeadRecommendation(leadState, qualification);
   const summary = buildAiLeadSummary(leadState) || "Клиент общался с AI-помощником, но краткое резюме не собрано.";
+  const communicationProfile = leadState.communicationProfile || inferCommunicationProfile(history, leadState);
 
   const lines = [
     "AI-помощник сайта Nikaled",
@@ -122,11 +139,12 @@ export const buildAiLeadContext = (leadState: AiLeadState, history: AiMessage[])
     `Приоритет: ${leadState.priority || leadState.designPreference || "-"}`,
     `Срок: ${leadState.deadline || "-"}`,
     `Бюджет: ${leadState.budget || "-"}`,
-    `Фото фасада: ${leadState.hasPhoto === true ? "готов прислать / есть" : "-"}`,
     `Размеры: ${leadState.size || "-"}`,
     "",
     "Рекомендованный следующий шаг:",
     recommendation,
+    "",
+    formatCommunicationProfile(communicationProfile),
     "",
     "Краткое резюме диалога:",
     summary,
@@ -142,6 +160,7 @@ export const enrichLeadStateForSubmission = (leadState: AiLeadState, history: Ai
   const { qualification, probability } = qualifyAiLead(leadState);
   const recommendedNextStep = buildAiLeadRecommendation(leadState, qualification);
   const summary = buildAiLeadSummary(leadState);
+  const communicationProfile = leadState.communicationProfile || inferCommunicationProfile(history, leadState);
   const recentUserText = lastUserMessages(history)
     .map((item) => item.content)
     .join(" ");
@@ -151,6 +170,7 @@ export const enrichLeadStateForSubmission = (leadState: AiLeadState, history: Ai
     qualification,
     probability,
     recommendedNextStep,
+    communicationProfile,
     summary: summary || recentUserText || leadState.summary
   };
 };

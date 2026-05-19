@@ -4,6 +4,7 @@ import {
   buildExpertQuickReplies,
   detectInquiryType
 } from "@/lib/ai-assistant/expert-flow";
+import { inferCommunicationProfile } from "@/lib/ai-assistant/dna-lite";
 import { inferLeadStateFromText } from "@/lib/ai-assistant/intake";
 import {
   buildOpenAiRequestBody,
@@ -56,6 +57,18 @@ const fallback = (message: string, leadState: AiLeadState, shouldAskContact = tr
   );
 
 const normalizeLeadState = (payload: AiAssistantRequest): AiLeadState => {
+  const historyWithCurrentMessage =
+    payload.history.at(-1)?.role === "user" && payload.history.at(-1)?.content === payload.message
+      ? payload.history
+      : [
+          ...payload.history,
+          {
+            id: `${payload.sessionId}-current`,
+            role: "user" as const,
+            content: payload.message,
+            createdAt: new Date().toISOString()
+          }
+        ];
   const inferredLeadState = inferLeadStateFromText(payload.message, payload.history);
   const normalizedState: AiLeadState = {
     ...payload.leadState,
@@ -75,7 +88,8 @@ const normalizeLeadState = (payload: AiAssistantRequest): AiLeadState => {
 
   return {
     ...normalizedState,
-    spinStage: normalizedState.spinStage || detectSpinStage(normalizedState)
+    spinStage: normalizedState.spinStage || detectSpinStage(normalizedState),
+    communicationProfile: inferCommunicationProfile(historyWithCurrentMessage, normalizedState)
   };
 };
 
@@ -151,7 +165,7 @@ const sanitizeAssistantReply = (reply: string, payload: AiAssistantRequest, lead
   }
 
   if (!nextReply) {
-    nextReply = "Могу помочь с предварительным расчётом. Есть фото фасада или размеры?";
+    nextReply = "Могу помочь с предварительным расчётом. Подскажите размер или желаемый формат вывески.";
   }
 
   if (MOCKUP_BARRIER_REGEX.test(nextReply)) {
@@ -369,15 +383,31 @@ export async function POST(request: Request) {
     }
 
     const mergedLeadState = mergeLeadState(normalizedLeadState, modelResult.leadStatePatch);
+    const historyWithCurrentMessage =
+      payload.history.at(-1)?.role === "user" && payload.history.at(-1)?.content === payload.message
+        ? payload.history
+        : [
+            ...payload.history,
+            {
+              id: `${payload.sessionId}-current`,
+              role: "user" as const,
+              content: payload.message,
+              createdAt: new Date().toISOString()
+            }
+          ];
+    const profiledLeadState: AiLeadState = {
+      ...mergedLeadState,
+      communicationProfile: inferCommunicationProfile(historyWithCurrentMessage, mergedLeadState)
+    };
     const userMessagesCount = payload.history.filter((item) => item.role === "user").length;
-    const heuristicFlags = buildHeuristicFlags(mergedLeadState, userMessagesCount);
+    const heuristicFlags = buildHeuristicFlags(profiledLeadState, userMessagesCount);
 
-    const resolvedQuickReplies = buildQuickReplies(mergedLeadState, payload.message, payload.history);
+    const resolvedQuickReplies = buildQuickReplies(profiledLeadState, payload.message, payload.history);
 
     return NextResponse.json({
       ok: true,
-      reply: sanitizeAssistantReply(modelResult.reply, payload, mergedLeadState),
-      leadState: mergedLeadState,
+      reply: sanitizeAssistantReply(modelResult.reply, payload, profiledLeadState),
+      leadState: profiledLeadState,
       quickReplies: resolvedQuickReplies,
       shouldAskContact: modelResult.shouldAskContact || heuristicFlags.shouldAskContact,
       shouldSubmitLead: modelResult.shouldSubmitLead || heuristicFlags.shouldSubmitLead

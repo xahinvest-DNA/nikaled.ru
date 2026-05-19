@@ -4,6 +4,31 @@ export type AiQualification = "hot" | "warm" | "cold";
 export type AiProbability = "high" | "medium" | "low";
 export type AiSpinStage = "situation" | "problem" | "implication" | "need_payoff" | "close";
 export type AiInquiryType = "calculation" | "selection" | "timing" | "approval" | "photo" | "question";
+export type AiProfileConfidence = "low" | "medium" | "high";
+export type AiConfidenceSource = "experience" | "logic" | "emotion" | "authority" | "mixed";
+export type AiUncertaintyTolerance = "low" | "medium" | "high";
+export type AiRequestStyle = "solution" | "validation" | "confirmation" | "contact" | "objection" | "mixed";
+export type AiThinkingHorizon = "immediate" | "planned" | "strategic";
+export type AiValueDriver = "speed" | "clarity" | "reliability" | "visibility" | "price" | "mixed";
+export type AiCommunicationMode = "operational" | "contact" | "reflective" | "aggressive" | "mixed";
+export type AiHiddenNeed = "certainty" | "control" | "speed" | "safety" | "recognition" | "simplicity";
+
+export type AiCommunicationProfile = {
+  sourceOfConfidence: AiConfidenceSource;
+  uncertaintyTolerance: AiUncertaintyTolerance;
+  requestStyle: AiRequestStyle;
+  thinkingHorizon: AiThinkingHorizon;
+  valueDriver: AiValueDriver;
+  communicationMode: AiCommunicationMode;
+  hiddenNeed: AiHiddenNeed;
+  confidence: AiProfileConfidence;
+  do: string[];
+  avoid: string[];
+  trustTriggers: string[];
+  resistanceTriggers: string[];
+  managerOpener: string;
+  followUpStyle: string;
+};
 
 export type AiMessage = {
   id: string;
@@ -40,6 +65,7 @@ export type AiLeadState = {
   qualification?: AiQualification;
   probability?: AiProbability;
   recommendedNextStep?: string;
+  communicationProfile?: AiCommunicationProfile;
   page?: string;
   source?: string;
   referrer?: string;
