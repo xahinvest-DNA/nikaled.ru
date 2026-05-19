@@ -22,7 +22,26 @@ const bad = (message: string, status = 400) =>
 
 export async function POST(request: Request) {
   try {
-    const payload = (await request.json()) as AiAssistantLeadRequest;
+    const contentType = request.headers.get("content-type") || "";
+    let payload: AiAssistantLeadRequest;
+    let file: File | undefined;
+
+    if (contentType.includes("multipart/form-data")) {
+      const form = await request.formData();
+      const historyRaw = String(form.get("history") || "[]");
+      const leadStateRaw = String(form.get("leadState") || "{}");
+
+      payload = {
+        sessionId: String(form.get("sessionId") || "").trim(),
+        history: JSON.parse(historyRaw),
+        leadState: JSON.parse(leadStateRaw)
+      } as AiAssistantLeadRequest;
+
+      const maybeFile = form.get("file");
+      file = maybeFile instanceof File && maybeFile.size > 0 ? maybeFile : undefined;
+    } else {
+      payload = (await request.json()) as AiAssistantLeadRequest;
+    }
 
     if (!payload.sessionId?.trim()) return bad("sessionId is required");
     if (!payload.leadState?.phone?.trim()) return bad("phone is required");
@@ -35,7 +54,13 @@ export async function POST(request: Request) {
       return bad("Too many lead submissions for this session", 429);
     }
 
-    const enrichedLeadState = enrichLeadStateForSubmission(payload.leadState, payload.history || []);
+    const enrichedLeadState = enrichLeadStateForSubmission(
+      {
+        ...payload.leadState,
+        hasPhoto: file ? true : payload.leadState.hasPhoto
+      },
+      payload.history || []
+    );
     const context = buildAiLeadContext(enrichedLeadState, payload.history || []);
 
     await sendLead({
@@ -51,7 +76,7 @@ export async function POST(request: Request) {
       utm_term: enrichedLeadState.utm_term?.trim() || "",
       utm_content: enrichedLeadState.utm_content?.trim() || "",
       submittedAt: new Date().toISOString()
-    });
+    }, file);
 
     return NextResponse.json({
       ok: true,
