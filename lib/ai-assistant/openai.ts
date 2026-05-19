@@ -128,7 +128,7 @@ export const buildOpenAiRequestBody = (
 ): OpenAiChatCompletionRequestBody => ({
   model,
   temperature: 0.2,
-  max_tokens: 450,
+  max_tokens: 280,
   messages: [
     {
       role: "system",
