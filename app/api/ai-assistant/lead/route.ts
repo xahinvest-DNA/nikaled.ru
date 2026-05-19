@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     );
     const context = buildAiLeadContext(enrichedLeadState, payload.history || []);
 
-    await sendLead({
+    const leadPayload = {
       name: enrichedLeadState.name?.trim() || "",
       phone,
       context,
@@ -76,7 +76,13 @@ export async function POST(request: Request) {
       utm_term: enrichedLeadState.utm_term?.trim() || "",
       utm_content: enrichedLeadState.utm_content?.trim() || "",
       submittedAt: new Date().toISOString()
-    }, file);
+    } as const;
+
+    // Attachment delivery can take noticeably longer than the browser request budget on mobile.
+    // We acknowledge the lead immediately and let delivery finish in the background.
+    void sendLead(leadPayload, file).catch((error) => {
+      console.error("AI assistant lead background delivery failed:", error);
+    });
 
     return NextResponse.json({
       ok: true,
