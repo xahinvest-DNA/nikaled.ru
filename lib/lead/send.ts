@@ -6,6 +6,7 @@ import nodemailer from "nodemailer";
 
 import { toLeadText } from "@/lib/lead/format";
 import type { LeadPayload } from "@/lib/lead/types";
+import { DAILY_REPORT_LEAD_SOURCE, recordLeadEvent, type LeadDeliveryChannel } from "@/lib/reporting/lead-events";
 
 type LeadProvider = "telegram" | "email";
 
@@ -126,7 +127,7 @@ export const sendLeadToEmail = async (lead: LeadPayload, file?: File) => {
   await transporter.sendMail({
     from,
     to,
-    subject: "Новая заявка с сайта",
+    subject: lead.source === DAILY_REPORT_LEAD_SOURCE ? "Ежедневный отчёт Nikaled" : "Новая заявка с сайта",
     text: toLeadText(lead),
     attachments
   });
@@ -225,6 +226,10 @@ const resolveLeadProvider = (): LeadProvider => {
   throw new Error(`Lead transport is not configured. ${details}`);
 };
 
+const finalizeSuccessfulDelivery = async (lead: LeadPayload, deliveryChannel: LeadDeliveryChannel) => {
+  await recordLeadEvent(lead, deliveryChannel);
+};
+
 export const sendLead = async (lead: LeadPayload, file?: File) => {
   const config = getLeadConfig();
   const provider = resolveLeadProvider();
@@ -232,16 +237,19 @@ export const sendLead = async (lead: LeadPayload, file?: File) => {
   try {
     if (provider === "email") {
       await sendLeadToEmail(lead, file);
+      await finalizeSuccessfulDelivery(lead, "email");
       return;
     }
 
     if (config.hasTelegram) {
       await sendLeadToTelegram(lead, file);
+      await finalizeSuccessfulDelivery(lead, "telegram");
       return;
     }
 
     if (config.hasRelay) {
       await sendLeadToRelay(lead, file);
+      await finalizeSuccessfulDelivery(lead, "relay");
       return;
     }
 
@@ -251,6 +259,7 @@ export const sendLead = async (lead: LeadPayload, file?: File) => {
       try {
         console.warn("Telegram delivery failed. Trying Netlify relay fallback.");
         await sendLeadToRelay(lead, file);
+        await finalizeSuccessfulDelivery(lead, "relay");
         return;
       } catch (relayError) {
         console.error("Relay fallback also failed:", {
@@ -263,6 +272,7 @@ export const sendLead = async (lead: LeadPayload, file?: File) => {
       try {
         console.warn("Telegram delivery failed. Trying email fallback.");
         await sendLeadToEmail(lead, file);
+        await finalizeSuccessfulDelivery(lead, "email");
         return;
       } catch (emailError) {
         console.error("Email fallback also failed:", {

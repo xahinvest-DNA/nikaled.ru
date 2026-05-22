@@ -251,6 +251,14 @@ const parseModelPayload = (data: unknown) => {
   };
 };
 
+const isRetryableAssistantError = (error: unknown) => {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  return /OpenAI returned empty content|Unexpected end of JSON input|JSON|invalid payload|length|Unexpected token/i.test(error.message);
+};
+
 const shouldTryRelayAfterError = (error: unknown) => {
   if (!(error instanceof Error)) {
     return false;
@@ -328,17 +336,11 @@ const requestOpenAiRelay = async (requestBody: OpenAiChatCompletionRequestBody) 
   return parseModelPayload(relayJson.data);
 };
 
-const requestOpenAiCompletion = async (payload: AiAssistantRequest, leadState: AiLeadState) => {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  const enabled = process.env.AI_ASSISTANT_ENABLED?.trim().toLowerCase() !== "false";
-  const hasRelay = Boolean(process.env.OPENAI_RELAY_URL?.trim() && process.env.OPENAI_RELAY_TOKEN?.trim());
-
-  if (!enabled) {
-    return null;
-  }
-
-  const requestBody = buildOpenAiRequestBody(payload, leadState, OPENAI_MODEL);
-
+const executeOpenAiRequest = async (
+  requestBody: OpenAiChatCompletionRequestBody,
+  apiKey: string | undefined,
+  hasRelay: boolean
+) => {
   if (apiKey) {
     try {
       return await requestOpenAiDirect(requestBody, apiKey);
@@ -361,6 +363,47 @@ const requestOpenAiCompletion = async (payload: AiAssistantRequest, leadState: A
   }
 
   return null;
+};
+
+const requestOpenAiCompletion = async (payload: AiAssistantRequest, leadState: AiLeadState) => {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const enabled = process.env.AI_ASSISTANT_ENABLED?.trim().toLowerCase() !== "false";
+  const hasRelay = Boolean(process.env.OPENAI_RELAY_URL?.trim() && process.env.OPENAI_RELAY_TOKEN?.trim());
+
+  if (!enabled) {
+    return null;
+  }
+
+  const primaryRequestBody = buildOpenAiRequestBody(payload, leadState, OPENAI_MODEL, {
+    maxTokens: 360
+  });
+
+  try {
+    return await executeOpenAiRequest(primaryRequestBody, apiKey, hasRelay);
+  } catch (error) {
+    const debug = process.env.AI_ASSISTANT_DEBUG?.trim().toLowerCase() === "true";
+
+    if (debug) {
+      console.warn("Primary AI request failed.", {
+        message: error instanceof Error ? error.message : String(error)
+      });
+    }
+
+    if (!isRetryableAssistantError(error)) {
+      throw error;
+    }
+
+    const compactRequestBody = buildOpenAiRequestBody(payload, leadState, OPENAI_MODEL, {
+      compact: true,
+      maxTokens: 220
+    });
+
+    if (debug) {
+      console.warn("Retrying AI request with compact prompt.");
+    }
+
+    return executeOpenAiRequest(compactRequestBody, apiKey, hasRelay);
+  }
 };
 
 export async function POST(request: Request) {

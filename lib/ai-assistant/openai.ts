@@ -42,6 +42,9 @@ export type OpenAiChatCompletionRequestBody = {
   model: string;
   temperature: number;
   max_tokens: number;
+  response_format?: {
+    type: "json_object";
+  };
   messages: Array<{
     role: "system" | "user";
     content: string;
@@ -50,6 +53,11 @@ export type OpenAiChatCompletionRequestBody = {
 
 export type OpenAiRelayRequestBody = {
   requestBody: OpenAiChatCompletionRequestBody;
+};
+
+type BuildOpenAiRequestOptions = {
+  compact?: boolean;
+  maxTokens?: number;
 };
 
 export const OPENAI_RESPONSE_SCHEMA = {
@@ -142,20 +150,28 @@ export const stringifyHistoryForModel = (history: AiAssistantRequest["history"])
 export const buildOpenAiRequestBody = (
   payload: AiAssistantRequest,
   leadState: AiLeadState,
-  model: string
+  model: string,
+  options: BuildOpenAiRequestOptions = {}
 ): OpenAiChatCompletionRequestBody => ({
   model,
   temperature: 0.2,
-  max_tokens: 280,
+  max_tokens: options.maxTokens ?? 360,
+  response_format: {
+    type: "json_object"
+  },
   messages: [
     {
       role: "system",
       content: AI_ASSISTANT_SYSTEM_PROMPT
     },
-    {
-      role: "system",
-      content: `База знаний сайта Nikaled:\n${AI_ASSISTANT_KNOWLEDGE}`
-    },
+    ...(!options.compact
+      ? [
+          {
+            role: "system" as const,
+            content: `База знаний сайта Nikaled:\n${AI_ASSISTANT_KNOWLEDGE}`
+          }
+        ]
+      : []),
     {
       role: "system",
       content: buildExpertGuidanceText(payload.message, leadState, payload.history)
@@ -197,8 +213,11 @@ export const buildOpenAiRequestBody = (
             spinStage: null
           }
         }),
-        "Все ключи обязательны. Если данных нет, используй null, false или пустой массив."
-      ].join("\n")
+        "Все ключи обязательны. Если данных нет, используй null, false или пустой массив.",
+        options.compact ? "Это повторная попытка. Ответ должен быть очень коротким и строго валидным JSON." : ""
+      ]
+        .filter(Boolean)
+        .join("\n")
     },
     {
       role: "user",
@@ -210,7 +229,9 @@ export const buildOpenAiRequestBody = (
         `История диалога:\n${stringifyHistoryForModel(payload.history) || "-"}`,
         `Новое сообщение клиента: ${payload.message}`,
         "",
-        "Верни JSON по схеме. В reply дай готовый ответ клиенту."
+        options.compact
+          ? "Дай короткий ответ клиенту и строго валидный JSON по схеме."
+          : "Верни JSON по схеме. В reply дай готовый ответ клиенту."
       ].join("\n")
     }
   ]

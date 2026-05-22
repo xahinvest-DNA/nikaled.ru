@@ -1,7 +1,13 @@
 import type { LeadPayload } from "@/lib/lead/types";
 
-export const toLeadText = (lead: LeadPayload) =>
-  [
+const DAILY_REPORT_SOURCE = "daily_report";
+
+export const toLeadText = (lead: LeadPayload) => {
+  if (lead.source === DAILY_REPORT_SOURCE) {
+    return lead.context;
+  }
+
+  return [
     "Новая заявка с сайта",
     `Имя: ${lead.name || "-"}`,
     `Телефон: ${lead.phone}`,
@@ -16,3 +22,4 @@ export const toLeadText = (lead: LeadPayload) =>
     `UTM content: ${lead.utm_content || "-"}`,
     `Время: ${lead.submittedAt}`
   ].join("\n");
+};
