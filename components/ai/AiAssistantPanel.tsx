@@ -519,8 +519,15 @@ export const AiAssistantPanel = ({ open, onClose }: Props) => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button type="button" className="hidden text-xs font-semibold text-steel/60 md:inline-flex" onClick={resetDialogState}>
-              Очистить
+            <button
+              type="button"
+              className="inline-flex rounded-full border border-steel/10 px-3 py-2 text-xs font-semibold text-steel/65 transition hover:border-steel/25 hover:text-steel"
+              onClick={resetDialogState}
+              aria-label="Очистить диалог"
+              title="Очистить диалог"
+            >
+              <span className="md:hidden">Сброс</span>
+              <span className="hidden md:inline">Очистить</span>
             </button>
             <button
               type="button"

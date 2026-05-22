@@ -7,11 +7,13 @@ export const AI_ASSISTANT_STORAGE_KEYS = {
   meta: "nikaled_ai_meta"
 } as const;
 
+export const AI_ASSISTANT_SESSION_VERSION = "2026-05-22-mobile-reset";
 export const AI_ASSISTANT_MAX_MESSAGES = 20;
 export const AI_ASSISTANT_INACTIVITY_MS = 24 * 60 * 60 * 1000;
 export const AI_ASSISTANT_LEAD_COOLDOWN_MS = 45_000;
 
 type StoredMeta = {
+  version?: string;
   leadSubmittedAt?: string;
   lastActiveAt: string;
 };
@@ -65,7 +67,8 @@ export const loadAiSession = (): AiStoredSession => {
   }
 
   const meta = safeJsonParse<StoredMeta | null>(window.localStorage.getItem(AI_ASSISTANT_STORAGE_KEYS.meta), null);
-  const shouldReset = shouldResetAiSession(meta?.lastActiveAt);
+  const shouldReset =
+    shouldResetAiSession(meta?.lastActiveAt) || meta?.version !== AI_ASSISTANT_SESSION_VERSION;
 
   if (shouldReset) {
     const sessionId = createSessionId();
@@ -76,6 +79,7 @@ export const loadAiSession = (): AiStoredSession => {
     window.localStorage.setItem(
       AI_ASSISTANT_STORAGE_KEYS.meta,
       JSON.stringify({
+        version: AI_ASSISTANT_SESSION_VERSION,
         lastActiveAt: now
       } satisfies StoredMeta)
     );
@@ -116,6 +120,7 @@ export const saveAiSession = (session: AiStoredSession) => {
   window.localStorage.setItem(
     AI_ASSISTANT_STORAGE_KEYS.meta,
     JSON.stringify({
+      version: AI_ASSISTANT_SESSION_VERSION,
       leadSubmittedAt: normalizedSession.leadSubmittedAt,
       lastActiveAt: normalizedSession.lastActiveAt
     } satisfies StoredMeta)
