@@ -32,7 +32,7 @@ const AI_CHAT_MESSAGES_LIMIT = 20;
 const AI_CHAT_WINDOW_MS = 10 * 60 * 1000;
 const OPENAI_MODEL = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
 const OPENAI_DIRECT_TIMEOUT_MS = 8000;
-const OPENAI_RELAY_TIMEOUT_MS = 45000;
+const OPENAI_RELAY_TIMEOUT_MS = 18000;
 
 const bad = (message: string, status = 400) =>
   NextResponse.json(
@@ -256,7 +256,7 @@ const isRetryableAssistantError = (error: unknown) => {
     return false;
   }
 
-  return /OpenAI returned empty content|Unexpected end of JSON input|JSON|invalid payload|length|Unexpected token/i.test(error.message);
+  return /OpenAI returned empty content|Unexpected end of JSON input|JSON|invalid payload|length|Unexpected token|timeout|aborted|fetch failed|network/i.test(error.message);
 };
 
 const shouldTryRelayAfterError = (error: unknown) => {
@@ -395,7 +395,7 @@ const requestOpenAiCompletion = async (payload: AiAssistantRequest, leadState: A
 
     const compactRequestBody = buildOpenAiRequestBody(payload, leadState, OPENAI_MODEL, {
       compact: true,
-      maxTokens: 220
+      maxTokens: 180
     });
 
     if (debug) {
