@@ -8,10 +8,16 @@ import { DAILY_REPORT_LEAD_SOURCE } from "@/lib/reporting/lead-events";
 export const runtime = "nodejs";
 
 const unauthorized = () => NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
+const disabled = () => NextResponse.json({ ok: false, message: "Disabled" }, { status: 404 });
 
 export async function POST(request: Request) {
+  const isEnabled = (process.env.DAILY_REPORT_ENABLED?.trim().toLowerCase() || "false") === "true";
   const token = process.env.DAILY_REPORT_TOKEN?.trim() || "";
   const providedToken = request.headers.get("x-internal-report-token")?.trim() || "";
+
+  if (!isEnabled) {
+    return disabled();
+  }
 
   if (!token || providedToken !== token) {
     return unauthorized();
